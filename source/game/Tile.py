@@ -9,6 +9,7 @@ class Tile:
         self.color = color
         self.boarder_radius = border_radius
         self.background = self.__initialize_tile(display_position, tile_size, color, border_radius)
+        self.currently_animated = False
 
     @staticmethod
     def __initialize_tile(display_position, tile_size, color, border_radius):

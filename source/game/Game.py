@@ -116,7 +116,8 @@ class Game:
         if is_animated:
             self.__add_animation(
                 MoveAnimation(self.selected_piece, type(self.selected_piece), self.selected_piece.display_position,
-                              tile.display_position, anim_settings.PIECE_MOVE_DURATION), self.move_animations)
+                              tile.display_position, anim_settings.PIECE_MOVE_DURATION,
+                              captured_piece.image if captured_piece is not None else None), self.move_animations)
 
         for piece in pieces:
             if piece.piece == constants.Type.KING and piece.owner != self.active_player:
@@ -134,6 +135,18 @@ class Game:
         self.possible_moves = []
         self.pass_turn()
 
+    def __run_animation(self):
+        for animation in self.color_animations:
+            animation.animate()
+
+        for animation in self.move_animations:
+            animation.animate()
+            if animation.target_image is not None:
+                self.screen.blit(animation.target_image, animation.target_position)
+            self.screen.blit(animation.element.image, animation.element.display_position)
+
+        self.__clear_animations()
+
     @staticmethod
     def __add_animation(new_animation, animation_list):
         is_animation_new = True
@@ -147,30 +160,26 @@ class Game:
 
         if is_animation_new:
             animation_list.append(new_animation)
+            new_animation.element.currently_animated = True
 
     def update_screen(self):
-        for animation in self.color_animations:
-            animation.animate()
-
-        for animation in self.move_animations:
-            animation.animate()
-
         for tile_row in self.board.tiles:
             for tile in tile_row:
-                pg.draw.rect(self.screen, tile.color, tile.background)
+                if not tile.currently_animated:
+                    pg.draw.rect(self.screen, tile.color, tile.background)
 
         for player in self.players:
             for piece in player.pieces:
-                if piece is not self.dragged_piece and not piece.captured:
+                if piece is not self.dragged_piece and not piece.captured and not piece.currently_animated:
                     self.screen.blit(piece.image, piece.display_position)
 
         for move in self.possible_moves:
             pg.draw.circle(self.screen, self.possible_move_color, move[1], self.possible_move_radius)
 
+        self.__run_animation()
+
         if self.dragged_piece is not None:
             self.screen.blit(self.dragged_piece.image, self.dragged_piece.display_position)
-
-        self.__clear_animations()
 
     def pass_turn(self):
         self.active_player = (self.active_player + 1) % self.player_count

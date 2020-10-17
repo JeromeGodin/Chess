@@ -13,6 +13,7 @@ class Piece(ABC):
         self.image = pg.image.load('assets\\images\\pieces\\wp.png')
         self.color = color
         self.piece = piece
+        self.currently_animated = False
         self.has_moved = False
         self.captured = False
         self.value = value

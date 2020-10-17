@@ -21,6 +21,7 @@ class ColorAnimation(Animation):
         else:
             self.element.color = self.original_color
             self.is_over = True
+            self.element.currently_animated = False
 
     def reset(self):
         self.__frame_counter = 0
