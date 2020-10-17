@@ -1,5 +1,5 @@
 from string import ascii_uppercase as letters
-from source.Tile import Tile
+from source.game.Tile import Tile
 
 
 class Board:

@@ -1,14 +1,15 @@
 import pygame as pg
 import sys
-from source import Settings as settings
+from source import ApplicationSettings as app_settings
+from source.game import GameSettings as game_settings
 from source.game.Game import Game
 
 
 def initialize_display():
     pg.init()
-    display = pg.display.set_mode(settings.DISPLAY_SIZE)
-    pg.display.set_caption(settings.WINDOW_TITLE)
-    pg.display.set_icon(pg.image.load(settings.WINDOW_ICON))
+    display = pg.display.set_mode(app_settings.DISPLAY_SIZE)
+    pg.display.set_caption(app_settings.WINDOW_TITLE)
+    pg.display.set_icon(pg.image.load(app_settings.WINDOW_ICON))
 
     return display
 
@@ -19,8 +20,8 @@ def main():
     clock = pg.time.Clock()
 
     # Initializing a new game
-    game = Game(settings.PLAYER_COUNT, settings.DISPLAY_SIZE, settings.TILE_SIZE_IN_PIXELS, settings.BOARD_SIZE,
-                settings.BEIGE, settings.GREEN, settings.RED)
+    game = Game(game_settings.PLAYER_COUNT, app_settings.DISPLAY_SIZE, game_settings.TILE_SIZE_IN_PIXELS,
+                game_settings.BOARD_SIZE, game_settings.BEIGE, game_settings.GREEN, game_settings.RED)
 
     # Main game loop
     while not game.is_over:
@@ -44,7 +45,7 @@ def main():
         pg.display.update()
 
         # Limit the FPS to MAX_FRAME_PER_SECOND
-        clock.tick(settings.MAX_FRAME_PER_SECOND)
+        clock.tick(app_settings.MAX_FRAME_PER_SECOND)
 
 
 if __name__ == "__main__":
