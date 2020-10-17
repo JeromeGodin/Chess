@@ -57,9 +57,9 @@ class Piece(ABC):
         return is_king_in_check
 
     @staticmethod
-    def __get_possible_move(position, tile):
+    def __get_possible_move(position, tile, is_capture):
         return (position, (tile.display_position[0] + int(math.floor(tile.tile_size / 2)),
-                           tile.display_position[1] + int(math.floor(tile.tile_size / 2))))
+                           tile.display_position[1] + int(math.floor(tile.tile_size / 2))), is_capture)
 
     def get_possible_moves(self, pieces, board):
         possible_moves = []
@@ -88,12 +88,12 @@ class Piece(ABC):
                             if move.capture is not constants.Capture.MANDATORY:
                                 possible_moves.append(self.__get_possible_move(target_position,
                                                                                board.tiles[target_position[0]][
-                                                                                   target_position[1]]))
+                                                                                   target_position[1]], False))
                         else:
                             if move.capture is not constants.Capture.NO and piece.owner != self.owner:
                                 possible_moves.append(self.__get_possible_move(target_position,
                                                                                board.tiles[target_position[0]][
-                                                                                   target_position[1]]))
+                                                                                   target_position[1]], True))
                             break
                     else:
                         break

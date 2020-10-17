@@ -10,7 +10,8 @@ from source.animations import AnimationSettings as anim_settings
 
 class Game:
     def __init__(self, player_count, display_size, tile_size, board_size, white_color, black_color, red_color,
-                 possible_move_radius, possible_move_color, horizontal_offset=0, vertical_offset=0):
+                 possible_move_radius, possible_capture_radius, possible_move_color, possible_capture_width,
+                 horizontal_offset=0, vertical_offset=0):
         self.board = Board(board_size, tile_size, white_color, black_color, red_color, horizontal_offset,
                            vertical_offset)
         self.players = self.__initialize_players(player_count, board_size, tile_size, horizontal_offset,
@@ -24,6 +25,8 @@ class Game:
 
         self.possible_move_radius = possible_move_radius
         self.possible_move_color = possible_move_color
+        self.possible_capture_radius = possible_capture_radius
+        self.possible_capture_width = possible_capture_width
 
         self.dragged_piece = None
         self.selected_piece = None
@@ -150,6 +153,8 @@ class Game:
             new_animation.element.currently_animated = True
 
     def update_screen(self):
+        # self.screen.fill((0, 0, 0, 255), None, pg.BLEND_RGBA_MULT)
+
         for tile_row in self.board.tiles:
             for tile in tile_row:
                 if not tile.currently_animated:
@@ -163,7 +168,11 @@ class Game:
                     self.screen.blit(piece.image, piece.display_position)
 
         for move in self.possible_moves:
-            pg.draw.circle(self.screen, self.possible_move_color, move[1], self.possible_move_radius)
+            if move[2]:
+                pg.draw.circle(self.screen, self.possible_move_color, move[1], self.possible_capture_radius,
+                               self.possible_capture_width)
+            else:
+                pg.draw.circle(self.screen, self.possible_move_color, move[1], self.possible_move_radius)
 
         self.__run_piece_animation()
 
