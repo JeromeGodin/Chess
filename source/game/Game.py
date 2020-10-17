@@ -5,11 +5,12 @@ from source.game.Player import Player
 from source.pieces import Constants as constants
 from source.animations.ColorAnimation import ColorAnimation
 from source.animations.MoveAnimation import MoveAnimation
+from source.animations import AnimationSettings as anim_settings
 
 
 class Game:
     def __init__(self, player_count, display_size, tile_size, board_size, white_color, black_color, red_color,
-                 horizontal_offset=0, vertical_offset=0):
+                 possible_move_radius, possible_move_color, horizontal_offset=0, vertical_offset=0):
         self.board = Board(board_size, tile_size, white_color, black_color, red_color, horizontal_offset,
                            vertical_offset)
         self.players = self.__initialize_players(player_count, board_size, tile_size, horizontal_offset,
@@ -20,6 +21,9 @@ class Game:
         self.player_count = player_count
         self.active_player = 0
         self.is_over = False
+
+        self.possible_move_radius = possible_move_radius
+        self.possible_move_color = possible_move_color
 
         self.dragged_piece = None
         self.selected_piece = None
@@ -112,7 +116,7 @@ class Game:
         if is_animated:
             self.__add_animation(
                 MoveAnimation(self.selected_piece, type(self.selected_piece), self.selected_piece.display_position,
-                              tile.display_position, 18), self.move_animations)
+                              tile.display_position, anim_settings.PIECE_MOVE_DURATION), self.move_animations)
 
         for piece in pieces:
             if piece.piece == constants.Type.KING and piece.owner != self.active_player:
@@ -161,7 +165,7 @@ class Game:
                     self.screen.blit(piece.image, piece.display_position)
 
         for move in self.possible_moves:
-            pg.draw.circle(self.screen, (100, 100, 100, 10), move[1], 20)
+            pg.draw.circle(self.screen, self.possible_move_color, move[1], self.possible_move_radius)
 
         if self.dragged_piece is not None:
             self.screen.blit(self.dragged_piece.image, self.dragged_piece.display_position)
@@ -240,7 +244,8 @@ class Game:
                                     tile = self.board.tiles[piece.board_position[0]][piece.board_position[1]]
                                     self.__add_animation(
                                         ColorAnimation(tile, type(tile), tile.color, [tile.color, self.board.red_color],
-                                                       90, 15), self.color_animations)
+                                                       anim_settings.TILE_FLASHING_DURATION,
+                                                       anim_settings.TILE_FLASHING_FREQUENCY), self.color_animations)
                                     break
 
                 self.dragged_piece = None

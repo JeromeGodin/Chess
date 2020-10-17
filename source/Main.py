@@ -21,7 +21,8 @@ def main():
 
     # Initializing a new game
     game = Game(game_settings.PLAYER_COUNT, app_settings.DISPLAY_SIZE, game_settings.TILE_SIZE_IN_PIXELS,
-                game_settings.BOARD_SIZE, game_settings.BEIGE, game_settings.GREEN, game_settings.RED)
+                game_settings.BOARD_SIZE, game_settings.BEIGE, game_settings.GREEN, game_settings.RED,
+                game_settings.POSSIBLE_MOVE_RADIUS, game_settings.POSSIBLE_MOVE_COLOR)
 
     # Main game loop
     while not game.is_over:
