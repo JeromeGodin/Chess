@@ -3,6 +3,7 @@ import math
 from source.game.Board import Board
 from source.game.Player import Player
 from source.pieces import Constants as constants
+from source.animations.ColorAnimation import ColorAnimation
 
 
 class Game:
@@ -23,7 +24,8 @@ class Game:
         self.selected_piece = None
         self.possible_moves = []
 
-        self.flashing_tile_animation = None
+        self.color_animations = []
+        self.move_animations = []
 
     @staticmethod
     def __initialize_screen(size):
@@ -63,24 +65,14 @@ class Game:
         self.check_sound = pg.mixer.Sound("assets\\sounds\\check.wav")
         self.illegal_sound = pg.mixer.Sound("assets\\sounds\\illegal.wav")
 
-    def update_screen(self):
-        for tile_row in self.board.tiles:
-            for tile in tile_row:
-                pg.draw.rect(self.screen, tile.color, tile.background)
+    def __clear_animations(self):
+        for animation in self.color_animations:
+            if animation.is_over:
+                self.color_animations.remove(animation)
 
-        for player in self.players:
-            for piece in player.pieces:
-                if piece is not self.dragged_piece and not piece.captured:
-                    self.screen.blit(piece.image, piece.display_position)
-
-        for move in self.possible_moves:
-            pg.draw.circle(self.screen, (100, 100, 100, 10), move[1], 20)
-
-        if self.dragged_piece is not None:
-            self.screen.blit(self.dragged_piece.image, self.dragged_piece.display_position)
-
-    def pass_turn(self):
-        self.active_player = (self.active_player + 1) % self.player_count
+        for animation in self.move_animations:
+            if animation.is_over:
+                self.move_animations.remove(animation)
 
     @staticmethod
     def __is_position_in_tile(position, board_tile):
@@ -131,6 +123,44 @@ class Game:
 
         self.possible_moves = []
         self.pass_turn()
+
+    @staticmethod
+    def __add_animation(new_animation, animation_list):
+        is_animation_new = True
+
+        for animation in animation_list:
+            if new_animation.element_type == animation.element_type and \
+                    new_animation.element.display_position == animation.element.display_position:
+                animation.reset()
+                is_animation_new = False
+                break
+
+        if is_animation_new:
+            animation_list.append(new_animation)
+
+    def update_screen(self):
+        for animation in self.color_animations:
+            animation.animate()
+
+        for tile_row in self.board.tiles:
+            for tile in tile_row:
+                pg.draw.rect(self.screen, tile.color, tile.background)
+
+        for player in self.players:
+            for piece in player.pieces:
+                if piece is not self.dragged_piece and not piece.captured:
+                    self.screen.blit(piece.image, piece.display_position)
+
+        for move in self.possible_moves:
+            pg.draw.circle(self.screen, (100, 100, 100, 10), move[1], 20)
+
+        if self.dragged_piece is not None:
+            self.screen.blit(self.dragged_piece.image, self.dragged_piece.display_position)
+
+        self.__clear_animations()
+
+    def pass_turn(self):
+        self.active_player = (self.active_player + 1) % self.player_count
 
     def click(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
@@ -198,8 +228,10 @@ class Game:
                                         (self.possible_moves == [] or
                                          target_tile.board_position != self.selected_piece.board_position):
                                     pg.mixer.Sound.play(self.illegal_sound)
-                                    self.board.tiles[piece.board_position[0]][
-                                        piece.board_position[1]].color = self.board.red_color
+                                    tile = self.board.tiles[piece.board_position[0]][piece.board_position[1]]
+                                    self.__add_animation(
+                                        ColorAnimation(tile, type(tile), tile.color, [tile.color, self.board.red_color],
+                                                       90, 15), self.color_animations)
                                     break
 
                 self.dragged_piece = None
