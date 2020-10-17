@@ -191,7 +191,9 @@ class Game:
 
                         for piece in pieces:
                             if piece.piece == constants.Type.KING and piece.owner == self.active_player:
-                                if piece.is_attacked(pieces, self.board):
+                                if piece.is_attacked(pieces, self.board) and \
+                                        (self.possible_moves == [] or
+                                         target_tile.board_position != self.selected_piece.board_position):
                                     pg.mixer.Sound.play(self.illegal_sound)
                                     self.board.tiles[piece.board_position[0]][
                                         piece.board_position[1]].color = self.board.red_color
