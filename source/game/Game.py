@@ -37,22 +37,6 @@ class Game:
         return pg.Surface(size, pg.SRCALPHA)
 
     @staticmethod
-    def __initialize_board(display, size, tile_size, white_color, black_color):
-        is_white = True
-
-        for file in range(int(math.floor(size[0] / tile_size))):
-            for rank in range(int(math.floor(size[1] / tile_size))):
-                pg.draw.rect(display, white_color if is_white else black_color,
-                             pg.Rect(file * tile_size, rank * tile_size,
-                                     tile_size, tile_size, border_radius=0))
-
-                is_white = not is_white
-
-            is_white = not is_white
-
-        return display
-
-    @staticmethod
     def __initialize_players(player_count, board_size, tile_size, horizontal_offset, vertical_offset):
         players = []
 
@@ -69,15 +53,7 @@ class Game:
         self.capture_sound = pg.mixer.Sound("assets\\sounds\\capture.wav")
         self.check_sound = pg.mixer.Sound("assets\\sounds\\check.wav")
         self.illegal_sound = pg.mixer.Sound("assets\\sounds\\illegal.wav")
-
-    def __clear_animations(self):
-        for animation in self.color_animations:
-            if animation.is_over:
-                self.color_animations.remove(animation)
-
-        for animation in self.move_animations:
-            if animation.is_over:
-                self.move_animations.remove(animation)
+        self.game_start_sound = pg.mixer.Sound("assets\\sounds\\game-start.wav")
 
     @staticmethod
     def __is_position_in_tile(position, board_tile):
@@ -117,7 +93,8 @@ class Game:
             self.__add_animation(
                 MoveAnimation(self.selected_piece, type(self.selected_piece), self.selected_piece.display_position,
                               tile.display_position, anim_settings.PIECE_MOVE_DURATION,
-                              captured_piece.image if captured_piece is not None else None), self.move_animations)
+                              captured_piece.image if captured_piece is not None else None,
+                              anim_settings.PIECE_MOVE_ERASE_TARGET), self.move_animations)
 
         for piece in pieces:
             if piece.piece == constants.Type.KING and piece.owner != self.active_player:
@@ -135,17 +112,27 @@ class Game:
         self.possible_moves = []
         self.pass_turn()
 
-    def __run_animation(self):
+    def __run_background_animation(self):
         for animation in self.color_animations:
             animation.animate()
+            pg.draw.rect(self.screen, animation.element.color, animation.element.background)
 
+        self.__clear_animations(self.color_animations)
+
+    def __run_piece_animation(self):
         for animation in self.move_animations:
             animation.animate()
-            if animation.target_image is not None:
+            if animation.display_target_image:
                 self.screen.blit(animation.target_image, animation.target_position)
             self.screen.blit(animation.element.image, animation.element.display_position)
 
-        self.__clear_animations()
+        self.__clear_animations(self.move_animations)
+
+    @staticmethod
+    def __clear_animations(animations):
+        for animation in animations:
+            if animation.is_over:
+                animations.remove(animation)
 
     @staticmethod
     def __add_animation(new_animation, animation_list):
@@ -168,6 +155,8 @@ class Game:
                 if not tile.currently_animated:
                     pg.draw.rect(self.screen, tile.color, tile.background)
 
+        self.__run_background_animation()
+
         for player in self.players:
             for piece in player.pieces:
                 if piece is not self.dragged_piece and not piece.captured and not piece.currently_animated:
@@ -176,7 +165,7 @@ class Game:
         for move in self.possible_moves:
             pg.draw.circle(self.screen, self.possible_move_color, move[1], self.possible_move_radius)
 
-        self.__run_animation()
+        self.__run_piece_animation()
 
         if self.dragged_piece is not None:
             self.screen.blit(self.dragged_piece.image, self.dragged_piece.display_position)
@@ -265,3 +254,6 @@ class Game:
             self.dragged_piece.display_position = (
                 position[0] - (self.board.tiles[0][0].tile_size / 2),
                 position[1] - (self.board.tiles[0][0].tile_size / 2))
+
+    def start(self):
+        pg.mixer.Sound.play(self.game_start_sound)

@@ -24,6 +24,8 @@ def main():
                 game_settings.BOARD_SIZE, game_settings.BEIGE, game_settings.GREEN, game_settings.RED,
                 game_settings.POSSIBLE_MOVE_RADIUS, game_settings.POSSIBLE_MOVE_COLOR)
 
+    game.start()
+
     # Main game loop
     while not game.is_over:
         # Check for events
