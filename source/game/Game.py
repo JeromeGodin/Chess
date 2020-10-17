@@ -55,6 +55,7 @@ class Game:
         self.move_sound = pg.mixer.Sound("assets\\sounds\\move.wav")
         self.capture_sound = pg.mixer.Sound("assets\\sounds\\capture.wav")
         self.check_sound = pg.mixer.Sound("assets\\sounds\\check.wav")
+        self.castle_sound = pg.mixer.Sound("assets\\sounds\\castle.wav")
         self.illegal_sound = pg.mixer.Sound("assets\\sounds\\illegal.wav")
         self.game_start_sound = pg.mixer.Sound("assets\\sounds\\game-start.wav")
 
@@ -78,18 +79,38 @@ class Game:
 
         return target_tile
 
-    def __move_piece_selected_piece(self, tile, pieces, is_animated):
+    def __move_selected_piece(self, tile, pieces, is_animated):
         is_check = False
         captured_piece = None
+        castling = False
 
-        for piece in pieces:
-            if piece.board_position == tile.board_position:
-                captured_piece = piece
-                break
+        # Castling
+        if self.selected_piece.piece == constants.Type.KING and abs(
+                self.selected_piece.board_position[1] - tile.board_position[1]) > 1:
+            move_direction_value = int(math.floor((self.selected_piece.board_position[1] - tile.board_position[1]) / abs(
+                self.selected_piece.board_position[1] - tile.board_position[1])))
+            rook = self.selected_piece.get_castling_rook(move_direction_value, pieces, self.board)
+            rook_tile = self.board.tiles[rook.board_position[0]][
+                tile.board_position[1] + move_direction_value]
 
-        if captured_piece is not None:
-            captured_piece.captured = True
+            rook.move(rook_tile, False)
+            self.__add_animation(
+                MoveAnimation(rook, type(rook), rook.display_position,
+                              rook_tile.display_position, anim_settings.PIECE_MOVE_DURATION, None,
+                              anim_settings.PIECE_MOVE_ERASE_TARGET), self.move_animations)
 
+            castling = True
+        else:
+            # Check for capture
+            for piece in pieces:
+                if piece.board_position == tile.board_position:
+                    captured_piece = piece
+                    break
+
+            if captured_piece is not None:
+                captured_piece.captured = True
+
+        # Move and animate piece if necessary
         self.selected_piece.move(tile, not is_animated)
 
         if is_animated:
@@ -99,6 +120,7 @@ class Game:
                               captured_piece.image if captured_piece is not None else None,
                               anim_settings.PIECE_MOVE_ERASE_TARGET), self.move_animations)
 
+        # Check for checks
         for piece in pieces:
             if piece.piece == constants.Type.KING and piece.owner != self.active_player:
                 if piece.is_attacked(pieces, self.board):
@@ -106,12 +128,17 @@ class Game:
                     is_check = True
                     break
 
+        # Play the appropriate sound if it is not a check
         if not is_check:
-            if captured_piece is not None:
-                pg.mixer.Sound.play(self.capture_sound)
+            if not castling:
+                if captured_piece is not None:
+                    pg.mixer.Sound.play(self.capture_sound)
+                else:
+                    pg.mixer.Sound.play(self.move_sound)
             else:
-                pg.mixer.Sound.play(self.move_sound)
+                pg.mixer.Sound.play(self.castle_sound)
 
+        # Pass the turn
         self.possible_moves = []
         self.pass_turn()
 
@@ -206,7 +233,7 @@ class Game:
                 if target_tile is not None:
                     for move in self.possible_moves:
                         if move[0] == target_tile.board_position:
-                            self.__move_piece_selected_piece(target_tile, pieces, True)
+                            self.__move_selected_piece(target_tile, pieces, True)
                             break
 
                 self.possible_moves = []
@@ -232,7 +259,7 @@ class Game:
                                 if not piece.captured:
                                     pieces.append(piece)
 
-                        self.__move_piece_selected_piece(target_tile, pieces, False)
+                        self.__move_selected_piece(target_tile, pieces, False)
                     else:
                         self.dragged_piece.display_position = self.dragged_piece.previous_display_position
 

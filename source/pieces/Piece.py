@@ -31,7 +31,12 @@ class Piece(ABC):
 
         return None
 
-    def __does_move_cause_check(self, attacked_player, position, pieces, board):
+    @staticmethod
+    def _get_possible_move(position, tile, is_capture):
+        return (position, (tile.display_position[0] + int(math.floor(tile.tile_size / 2)),
+                           tile.display_position[1] + int(math.floor(tile.tile_size / 2))), is_capture)
+
+    def _does_move_cause_check(self, attacked_player, position, pieces, board):
         captured_piece = None
         for piece in pieces:
             if piece.board_position == position:
@@ -56,47 +61,47 @@ class Piece(ABC):
 
         return is_king_in_check
 
-    @staticmethod
-    def __get_possible_move(position, tile, is_capture):
-        return (position, (tile.display_position[0] + int(math.floor(tile.tile_size / 2)),
-                           tile.display_position[1] + int(math.floor(tile.tile_size / 2))), is_capture)
-
     def get_possible_moves(self, pieces, board):
         possible_moves = []
         attacks = self.get_attacks(pieces, board)
 
         for attack in attacks:
-            if not self.__does_move_cause_check(self.owner, attack[0], pieces, board):
+            if not self._does_move_cause_check(self.owner, attack[0], pieces, board):
                 possible_moves.append(attack)
 
         return possible_moves
 
-    def get_attacks(self, pieces, board):
+    def get_attacks(self, pieces, board, ignore_custom_moves=False):
         possible_moves = []
         play_direction = 1 - 2 * self.owner
 
         for move in self._available_moves:
-            if not (move.first_move_only and self.has_moved):
-                max_distance = move.distance + 1
-                for distance in range(1, max_distance):
-                    target_position = (self.board_position[0] + move.direction.value[0] * distance * play_direction,
-                                       self.board_position[1] + move.direction.value[1] * distance * play_direction)
+            if move.custom_handling is None:
+                if not (move.first_move_only and self.has_moved):
+                    max_distance = move.distance + 1
+                    for distance in range(1, max_distance):
+                        target_position = (self.board_position[0] + move.direction.value[0] * distance * play_direction,
+                                           self.board_position[1] + move.direction.value[1] * distance * play_direction)
 
-                    if self.__is_position_in_board(target_position, board):
-                        piece = self.__get_piece_from_board_position(target_position, pieces)
-                        if piece is None:
-                            if move.capture is not constants.Capture.MANDATORY:
-                                possible_moves.append(self.__get_possible_move(target_position,
-                                                                               board.tiles[target_position[0]][
-                                                                                   target_position[1]], False))
+                        if self.__is_position_in_board(target_position, board):
+                            piece = self.__get_piece_from_board_position(target_position, pieces)
+                            if piece is None:
+                                if move.capture is not constants.Capture.MANDATORY:
+                                    possible_moves.append(self._get_possible_move(target_position,
+                                                                                  board.tiles[target_position[0]][
+                                                                                      target_position[1]], False))
+                            else:
+                                if move.capture is not constants.Capture.NO and piece.owner != self.owner:
+                                    possible_moves.append(self._get_possible_move(target_position,
+                                                                                  board.tiles[target_position[0]][
+                                                                                      target_position[1]], True))
+                                break
                         else:
-                            if move.capture is not constants.Capture.NO and piece.owner != self.owner:
-                                possible_moves.append(self.__get_possible_move(target_position,
-                                                                               board.tiles[target_position[0]][
-                                                                                   target_position[1]], True))
                             break
-                    else:
-                        break
+            elif not (move.first_move_only and self.has_moved) and not ignore_custom_moves:
+                custom_move = move.custom_handling(move, pieces, board)
+                if custom_move is not None:
+                    possible_moves.append(custom_move)
 
         return possible_moves
 
@@ -105,7 +110,7 @@ class Piece(ABC):
 
         for piece in pieces:
             if piece.owner != self.owner and not piece.captured:
-                for attack in piece.get_attacks(pieces, board):
+                for attack in piece.get_attacks(pieces, board, True):
                     if attack[0] == self.board_position:
                         is_attacked = True
                         break
