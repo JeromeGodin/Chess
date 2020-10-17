@@ -4,6 +4,7 @@ from source.game.Board import Board
 from source.game.Player import Player
 from source.pieces import Constants as constants
 from source.animations.ColorAnimation import ColorAnimation
+from source.animations.MoveAnimation import MoveAnimation
 
 
 class Game:
@@ -94,7 +95,7 @@ class Game:
 
         return target_tile
 
-    def __move_piece_selected_piece(self, tile, pieces):
+    def __move_piece_selected_piece(self, tile, pieces, is_animated):
         is_check = False
         captured_piece = None
 
@@ -106,7 +107,12 @@ class Game:
         if captured_piece is not None:
             captured_piece.captured = True
 
-        self.selected_piece.move(tile)
+        self.selected_piece.move(tile, not is_animated)
+
+        if is_animated:
+            self.__add_animation(
+                MoveAnimation(self.selected_piece, type(self.selected_piece), self.selected_piece.display_position,
+                              tile.display_position, 18), self.move_animations)
 
         for piece in pieces:
             if piece.piece == constants.Type.KING and piece.owner != self.active_player:
@@ -140,6 +146,9 @@ class Game:
 
     def update_screen(self):
         for animation in self.color_animations:
+            animation.animate()
+
+        for animation in self.move_animations:
             animation.animate()
 
         for tile_row in self.board.tiles:
@@ -186,7 +195,7 @@ class Game:
                 if target_tile is not None:
                     for move in self.possible_moves:
                         if move[0] == target_tile.board_position:
-                            self.__move_piece_selected_piece(target_tile, pieces)
+                            self.__move_piece_selected_piece(target_tile, pieces, True)
                             break
 
                 self.possible_moves = []
@@ -212,7 +221,7 @@ class Game:
                                 if not piece.captured:
                                     pieces.append(piece)
 
-                        self.__move_piece_selected_piece(target_tile, pieces)
+                        self.__move_piece_selected_piece(target_tile, pieces, False)
                     else:
                         self.dragged_piece.display_position = self.dragged_piece.previous_display_position
 
