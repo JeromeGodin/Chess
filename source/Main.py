@@ -1,7 +1,7 @@
 import pygame as pg
 import sys
 from source import Settings as settings
-from source.Game import Game
+from source.game.Game import Game
 
 
 def initialize_display():

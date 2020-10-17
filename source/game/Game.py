@@ -1,7 +1,7 @@
 import pygame as pg
 import math
-from source.Board import Board
-from source.Player import Player
+from source.game.Board import Board
+from source.game.Player import Player
 from source.pieces import Constants as constants
 
 
@@ -18,9 +18,12 @@ class Game:
         self.player_count = player_count
         self.active_player = 0
         self.is_over = False
+
         self.dragged_piece = None
         self.selected_piece = None
         self.possible_moves = []
+
+        self.flashing_tile_animation = None
 
     @staticmethod
     def __initialize_screen(size):
