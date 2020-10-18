@@ -40,6 +40,7 @@ def main():
             if event.type == pg.MOUSEBUTTONUP:
                 game.release_click(event)
 
+        # Update the position of the piece being dragged
         game.update_selected_piece_position()
 
         # Refresh the display

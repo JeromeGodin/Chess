@@ -12,6 +12,7 @@ class Pawn(Piece):
                                                                                        '.png')
         # self.image = pg.transform.scale(self.image, (settings.TILE_SIZE_IN_PIXELS, settings.TILE_SIZE_IN_PIXELS))
         self.could_get_captured_en_passant = False
+        self.ready_for_promotion = False
         self._available_moves = [
             Move(constants.Direction.UP, 1, constants.Capture.NO, False),
             Move(constants.Direction.UP, 2, constants.Capture.NO, True),
@@ -48,4 +49,3 @@ class Pawn(Piece):
                     break
 
         return pawn
-

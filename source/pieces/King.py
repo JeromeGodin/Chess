@@ -53,8 +53,6 @@ class King(Piece):
                     possible_move = self._get_possible_move(king_position,
                                                             board.tiles[king_position[0]][king_position[1]], False)
 
-        print(possible_move)
-
         return possible_move
 
     def get_castling_rook(self, move_direction_value, pieces, board):

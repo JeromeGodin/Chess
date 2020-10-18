@@ -6,6 +6,10 @@ from source.pieces import Constants as constants
 from source.animations.ColorAnimation import ColorAnimation
 from source.animations.MoveAnimation import MoveAnimation
 from source.animations import AnimationSettings as anim_settings
+from source.pieces.Bishop import Bishop
+from source.pieces.Knight import Knight
+from source.pieces.Queen import Queen
+from source.pieces.Rook import Rook
 
 
 class Game:
@@ -18,6 +22,11 @@ class Game:
                                                  vertical_offset)
         self.screen = self.__initialize_screen(display_size)
         self.__initialized_sounds()
+
+        self.__promoting_piece = None
+        self.__promotion_in_progress = False
+        self.__promotion_window_position = None
+        self.__promotion_pieces_positions = []
 
         self.player_count = player_count
         self.active_player = 0
@@ -106,10 +115,10 @@ class Game:
         elif self.selected_piece.piece == constants.Type.PAWN and abs(
                 self.selected_piece.board_position[0] - tile.board_position[0]) > 1:
             self.selected_piece.could_get_captured_en_passant = True
-        # Check if pawn capture is en passant
-        elif self.selected_piece.piece == constants.Type.PAWN and abs(
-                self.selected_piece.board_position[0] - tile.board_position[0]) == 1 and abs(
-                self.selected_piece.board_position[1] - tile.board_position[1]) == 1:
+        # Check if pawn is capturing en passant
+        elif self.selected_piece.piece == constants.Type.PAWN and \
+                abs(self.selected_piece.board_position[0] - tile.board_position[0]) == 1 and \
+                abs(self.selected_piece.board_position[1] - tile.board_position[1]) == 1:
             is_en_passant = True
 
             for piece in pieces:
@@ -143,6 +152,11 @@ class Game:
                               captured_piece.image if captured_piece is not None else None, target_image_position,
                               anim_settings.PIECE_MOVE_ERASE_TARGET), self.move_animations)
 
+        # Check for promotions
+        if self.selected_piece.piece == constants.Type.PAWN and self.selected_piece.board_position[0] == (
+                (self.board.size[0] - 1) * self.active_player):
+            self.__start_promotion(self.selected_piece)
+
         # Check for checks
         for piece in pieces:
             if piece.piece == constants.Type.KING and piece.owner != self.active_player:
@@ -163,7 +177,9 @@ class Game:
 
         # Pass the turn
         self.possible_moves = []
-        self.pass_turn()
+
+        if not self.__promotion_in_progress:
+            self.pass_turn()
 
     def __run_background_animation(self):
         for animation in self.color_animations:
@@ -202,8 +218,87 @@ class Game:
             animation_list.append(new_animation)
             new_animation.element.currently_animated = True
 
+    def __start_promotion(self, piece):
+        self.__promoting_piece = piece
+        self.__promotion_in_progress = True
+        self.__promotion_window_position = self.selected_piece.display_position
+
+        play_direction = 1 - 2 * self.active_player
+        self.__promotion_pieces_positions.append((constants.Type.QUEEN, self.__promotion_window_position,
+                                                  piece.board_position))
+        self.__promotion_pieces_positions.append((constants.Type.KNIGHT, (self.__promotion_window_position[0],
+                                                                          self.__promotion_window_position[
+                                                                              1] + play_direction *
+                                                                          self.board.tiles[0][0].tile_size),
+                                                  (piece.board_position[0] + play_direction, piece.board_position[1])))
+        self.__promotion_pieces_positions.append((constants.Type.ROOK, (self.__promotion_window_position[0],
+                                                                        self.__promotion_window_position[
+                                                                            1] + play_direction * 2 *
+                                                                        self.board.tiles[0][0].tile_size), (
+                                                      piece.board_position[0] + 2 * play_direction,
+                                                      piece.board_position[1])))
+        self.__promotion_pieces_positions.append((constants.Type.BISHOP, (self.__promotion_window_position[0],
+                                                                          self.__promotion_window_position[
+                                                                              1] + play_direction * 3 *
+                                                                          self.board.tiles[0][0].tile_size), (
+                                                      piece.board_position[0] + 3 * play_direction,
+                                                      piece.board_position[1])))
+
+    def __end_promotion(self, piece_choice):
+        self.__promote_piece(self.__promoting_piece, piece_choice)
+
+        self.__promoting_piece = None
+        self.__promotion_window_position = None
+        self.__promotion_pieces_positions = []
+        self.__promotion_in_progress = False
+
+        self.pass_turn()
+
+    def __display_promotion_window(self):
+        pg.draw.rect(self.screen, (255, 255, 255, 255),
+                     pg.Rect(self.__promotion_window_position[0],
+                             self.__promotion_window_position[1] - self.active_player * 3 * self.board.tiles[0][
+                                 0].tile_size,
+                             self.board.tiles[0][0].tile_size,
+                             self.board.tiles[0][0].tile_size * 4))
+
+        mouse_tile_position = self.__get_tile_from_position(pg.mouse.get_pos()).display_position
+
+        for position in self.__promotion_pieces_positions:
+            if position[1] == mouse_tile_position:
+                pg.draw.rect(self.screen, (200, 200, 200, 255),
+                             pg.Rect(position[1][0],
+                                     position[1][1],
+                                     self.board.tiles[0][0].tile_size,
+                                     self.board.tiles[0][0].tile_size))
+                break
+
+        for image in self.players[self.active_player].promotion_images:
+            for piece in self.__promotion_pieces_positions:
+                if piece[0] == image[0]:
+                    self.screen.blit(image[1], piece[1])
+
+    def __promote_piece(self, piece, piece_choice=constants.Type.QUEEN):
+        new_piece = None
+        self.players[piece.owner].pieces.remove(piece)
+
+        if piece_choice == constants.Type.QUEEN:
+            new_piece = Queen(piece.owner, piece.board_position, piece.display_position, piece.color)
+            self.players[piece.owner].pieces.append(new_piece)
+        elif piece_choice == constants.Type.KNIGHT:
+            new_piece = Knight(piece.owner, piece.board_position, piece.display_position, piece.color)
+            self.players[piece.owner].pieces.append(new_piece)
+        elif piece_choice == constants.Type.ROOK:
+            new_piece = Rook(piece.owner, piece.board_position, piece.display_position, piece.color)
+            self.players[piece.owner].pieces.append(new_piece)
+        elif piece_choice == constants.Type.BISHOP:
+            new_piece = Bishop(piece.owner, piece.board_position, piece.display_position, piece.color)
+            self.players[piece.owner].pieces.append(new_piece)
+
+        return new_piece
+
     def update_screen(self):
-        # self.screen.fill((0, 0, 0, 255), None, pg.BLEND_RGBA_MULT)
+        # self.screen.fill((0, 0, 0, 255))
 
         for tile_row in self.board.tiles:
             for tile in tile_row:
@@ -229,6 +324,9 @@ class Game:
         if self.dragged_piece is not None:
             self.screen.blit(self.dragged_piece.image, self.dragged_piece.display_position)
 
+        if self.__promotion_in_progress:
+            self.__display_promotion_window()
+
     def pass_turn(self):
         self.active_player = (self.active_player + 1) % self.player_count
         for piece in self.players[self.active_player].pieces:
@@ -236,79 +334,88 @@ class Game:
                 piece.could_get_captured_en_passant = False
 
     def click(self, event):
-        if event.type == pg.MOUSEBUTTONDOWN:
-            for piece in self.players[self.active_player].pieces:
-                if not piece.captured and self.__is_position_in_tile(event.pos,
-                                                                     self.board.tiles[piece.board_position[0]][
-                                                                         piece.board_position[1]]):
-                    self.dragged_piece = piece
-                    self.selected_piece = piece
-                    break
+        if not self.__promotion_in_progress:
+            if event.type == pg.MOUSEBUTTONDOWN:
+                for piece in self.players[self.active_player].pieces:
+                    if not piece.captured and self.__is_position_in_tile(event.pos,
+                                                                         self.board.tiles[piece.board_position[0]][
+                                                                             piece.board_position[1]]):
+                        self.dragged_piece = piece
+                        self.selected_piece = piece
+                        break
 
-            pieces = []
-            for player in self.players:
-                for piece in player.pieces:
-                    if not piece.captured:
-                        pieces.append(piece)
+                pieces = []
+                for player in self.players:
+                    for piece in player.pieces:
+                        if not piece.captured:
+                            pieces.append(piece)
 
-            if self.dragged_piece is not None:
-                self.possible_moves = self.dragged_piece.get_possible_moves(pieces, self.board)
-            elif self.selected_piece is not None:
-                target_tile = self.__get_tile_from_position(event.pos)
+                if self.dragged_piece is not None:
+                    self.possible_moves = self.dragged_piece.get_possible_moves(pieces, self.board)
+                elif self.selected_piece is not None:
+                    target_tile = self.__get_tile_from_position(event.pos)
 
-                if target_tile is not None:
-                    for move in self.possible_moves:
-                        if move[0] == target_tile.board_position:
-                            self.__move_selected_piece(target_tile, pieces, True)
-                            break
+                    if target_tile is not None:
+                        for move in self.possible_moves:
+                            if move[0] == target_tile.board_position:
+                                self.__move_selected_piece(target_tile, pieces, True)
+                                break
 
-                self.possible_moves = []
-                self.selected_piece = None
+                    self.possible_moves = []
+                    self.selected_piece = None
 
     def release_click(self, event):
-        if self.dragged_piece is not None:
-            if event.type == pg.MOUSEBUTTONUP:
-                target_tile = self.__get_tile_from_position(event.pos)
+        if not self.__promotion_in_progress:
+            if self.dragged_piece is not None:
+                if event.type == pg.MOUSEBUTTONUP:
+                    target_tile = self.__get_tile_from_position(event.pos)
 
-                if target_tile is not None:
-                    is_move_valid = False
+                    if target_tile is not None:
+                        is_move_valid = False
 
-                    for move in self.possible_moves:
-                        if move[0] == target_tile.board_position:
-                            is_move_valid = True
-                            break
+                        for move in self.possible_moves:
+                            if move[0] == target_tile.board_position:
+                                is_move_valid = True
+                                break
 
-                    if is_move_valid:
-                        pieces = []
-                        for player in self.players:
-                            for piece in player.pieces:
-                                if not piece.captured:
-                                    pieces.append(piece)
+                        if is_move_valid:
+                            pieces = []
+                            for player in self.players:
+                                for piece in player.pieces:
+                                    if not piece.captured:
+                                        pieces.append(piece)
 
-                        self.__move_selected_piece(target_tile, pieces, False)
-                    else:
-                        self.dragged_piece.display_position = self.dragged_piece.previous_display_position
+                            self.__move_selected_piece(target_tile, pieces, False)
+                        else:
+                            self.dragged_piece.display_position = self.dragged_piece.previous_display_position
 
-                        pieces = []
-                        for player in self.players:
-                            for piece in player.pieces:
-                                if not piece.captured:
-                                    pieces.append(piece)
+                            pieces = []
+                            for player in self.players:
+                                for piece in player.pieces:
+                                    if not piece.captured:
+                                        pieces.append(piece)
 
-                        for piece in pieces:
-                            if piece.piece == constants.Type.KING and piece.owner == self.active_player:
-                                if piece.is_attacked(pieces, self.board) and \
-                                        (self.possible_moves == [] or
-                                         target_tile.board_position != self.selected_piece.board_position):
-                                    pg.mixer.Sound.play(self.illegal_sound)
-                                    tile = self.board.tiles[piece.board_position[0]][piece.board_position[1]]
-                                    self.__add_animation(
-                                        ColorAnimation(tile, type(tile), tile.color, [tile.color, self.board.red_color],
-                                                       anim_settings.TILE_FLASHING_DURATION,
-                                                       anim_settings.TILE_FLASHING_FREQUENCY), self.color_animations)
-                                    break
+                            for piece in pieces:
+                                if piece.piece == constants.Type.KING and piece.owner == self.active_player:
+                                    if piece.is_attacked(pieces, self.board) and \
+                                            (self.possible_moves == [] or
+                                             target_tile.board_position != self.selected_piece.board_position):
+                                        pg.mixer.Sound.play(self.illegal_sound)
+                                        tile = self.board.tiles[piece.board_position[0]][piece.board_position[1]]
+                                        self.__add_animation(
+                                            ColorAnimation(tile, type(tile), tile.color,
+                                                           [tile.color, self.board.red_color],
+                                                           anim_settings.TILE_FLASHING_DURATION,
+                                                           anim_settings.TILE_FLASHING_FREQUENCY),
+                                            self.color_animations)
+                                        break
 
-                self.dragged_piece = None
+                    self.dragged_piece = None
+        else:
+            for position in self.__promotion_pieces_positions:
+                if self.__is_position_in_tile(event.pos, self.board.tiles[position[2][0]][position[2][1]]):
+                    self.__end_promotion(position[0])
+                    break
 
     def update_selected_piece_position(self):
         if self.dragged_piece is not None:

@@ -1,10 +1,12 @@
 import math
+import pygame as pg
 from source.pieces.Bishop import Bishop
 from source.pieces.King import King
 from source.pieces.Knight import Knight
 from source.pieces.Pawn import Pawn
 from source.pieces.Queen import Queen
 from source.pieces.Rook import Rook
+from source.pieces import Constants as constants
 
 
 class Player:
@@ -13,6 +15,7 @@ class Player:
         self.color = color
         self.pieces = self.__initialize_pieces(number, board_size, display_size, tile_size, horizontal_offset,
                                                vertical_offset, color)
+        self.promotion_images = self.__initialize_promotion_images()
 
     @staticmethod
     def __initialize_pieces(player, board_size, display_size, tile_size, horizontal_offset, vertical_offset,
@@ -70,3 +73,19 @@ class Player:
                  color))
 
         return pieces
+
+    def __initialize_promotion_images(self):
+        promotion_images = [(constants.Type.QUEEN, pg.image.load(
+            'assets\\images\\pieces\\wq100.png' if self.color == constants.Color.WHITE else
+            'assets\\images\\pieces\\bq100.png')),
+                            (constants.Type.KNIGHT, pg.image.load(
+                                'assets\\images\\pieces\\wn100.png' if self.color == constants.Color.WHITE else
+                                'assets\\images\\pieces\\bn100.png')),
+                            (constants.Type.ROOK, pg.image.load(
+                                'assets\\images\\pieces\\wr100.png' if self.color == constants.Color.WHITE else
+                                'assets\\images\\pieces\\br100.png')),
+                            (constants.Type.BISHOP, pg.image.load(
+                                'assets\\images\\pieces\\wb100.png' if self.color == constants.Color.WHITE else
+                                'assets\\images\\pieces\\bb100.png'))]
+
+        return promotion_images
