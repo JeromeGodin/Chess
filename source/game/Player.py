@@ -89,3 +89,27 @@ class Player:
                                 'assets\\images\\pieces\\bb100.png'))]
 
         return promotion_images
+
+    def __get_possible_moves(self, pieces, board):
+        possible_moves = []
+        for piece in self.pieces:
+            if not piece.captured:
+                possible_moves.extend(piece.get_possible_moves(pieces, board))
+
+        return possible_moves
+
+    def get_is_in_check(self, pieces, board):
+        is_in_check = False
+
+        for piece in self.pieces:
+            if piece.piece == constants.Type.KING:
+                is_in_check = piece.is_attacked(pieces, board)
+                break
+
+        return is_in_check
+
+    def get_is_in_checkmate(self, pieces, board):
+        return self.get_is_in_check(pieces, board) and len(self.__get_possible_moves(pieces, board)) == 0
+
+    def get_is_in_stalemate(self, pieces, board):
+        return not self.get_is_in_check(pieces, board) and len(self.__get_possible_moves(pieces, board)) == 0

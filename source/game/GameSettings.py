@@ -1,4 +1,5 @@
 import math
+from enum import Enum
 
 
 PLAYER_COUNT = 2
@@ -17,5 +18,29 @@ RED = (160, 0, 0, 255)
 
 POSSIBLE_MOVE_RADIUS = int(math.floor(TILE_SIZE_IN_PIXELS * 0.2))
 POSSIBLE_CAPTURE_RADIUS = int(math.floor(POSSIBLE_MOVE_RADIUS) * 2.4)
-POSSIBLE_MOVE_COLOR = (100, 100, 100, 10)
+POSSIBLE_MOVE_COLOR = (150, 150, 150, 10)
 POSSIBLE_CAPTURE_WIDTH = int(math.floor(TILE_SIZE_IN_PIXELS * 0.1))
+
+PROMOTION_WINDOW_COLOR = (255, 255, 255, 255)
+PROMOTION_WINDOW_HOVER_COLOR = (200, 200, 200, 255)
+
+
+class GameStatus(Enum):
+    MENU = 0
+    IN_PROGRESS = 1
+    OVER = 2
+
+
+class GameResult(Enum):
+    VICTORY = 0
+    DEFEAT = 1
+    DRAW = 2
+
+
+class GameFinish(Enum):
+    CHECKMATE = 0
+    STALEMATE = 1
+    REPETITION = 2
+    INSUFFICIENT_MATERIAL = 3
+    FIFTY_MOVES = 4
+    TIMEOUT = 5
