@@ -39,11 +39,8 @@ class Piece(ABC):
 
     def _does_move_cause_check(self, attacked_player, position, pieces, board):
         captured_piece = None
-        captured = False
         for piece in pieces:
-            if piece.board_position == position and piece.owner != attacked_player:
-                captured_piece = piece
-                captured = piece.captured
+            if piece.board_position == position and piece.owner != attacked_player and not piece.captured:
                 captured_piece.captured = True
                 break
 
@@ -58,7 +55,7 @@ class Piece(ABC):
                 break
 
         if captured_piece is not None:
-            captured_piece.captured = captured
+            captured_piece.captured = False
 
         self.board_position = board_position
 
