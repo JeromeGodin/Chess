@@ -19,7 +19,8 @@ from source.pieces.Rook import Rook
 class Game:
     def __init__(self, player_count, display_size, tile_size, board_size, white_color, black_color, red_color,
                  possible_move_radius, possible_capture_radius, possible_move_color, possible_capture_width,
-                 promotion_window_color, promotion_window_hover_color, horizontal_offset=0, vertical_offset=0):
+                 promotion_window_color, promotion_window_hover_color, hovered_tile_border_width, horizontal_offset=0,
+                 vertical_offset=0):
         self.board = Board(board_size, tile_size, white_color, black_color, red_color, horizontal_offset,
                            vertical_offset)
         self.players = self.__initialize_players(player_count, board_size, tile_size, horizontal_offset,
@@ -43,6 +44,7 @@ class Game:
         self.possible_move_color = possible_move_color
         self.possible_capture_radius = possible_capture_radius
         self.possible_capture_width = possible_capture_width
+        self.hovered_tile_border_width = hovered_tile_border_width
 
         self.dragged_piece = None
         self.selected_piece = None
@@ -479,6 +481,12 @@ class Game:
         self.__run_piece_animation()
 
         if self.dragged_piece is not None:
+            hovered_tile = self.__get_tile_from_position(pg.mouse.get_pos())
+            pg.draw.rect(self.screen, self.possible_move_color,
+                         pg.Rect(hovered_tile.display_position[0], hovered_tile.display_position[1],
+                                 hovered_tile.tile_size,
+                                 hovered_tile.tile_size), self.hovered_tile_border_width)
+
             self.screen.blit(self.dragged_piece.image, self.dragged_piece.display_position)
 
         if self.__promotion_in_progress:
