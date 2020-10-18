@@ -41,7 +41,7 @@ class Piece(ABC):
         captured_piece = None
         captured = False
         for piece in pieces:
-            if piece.board_position == position:
+            if piece.board_position == position and piece.owner != attacked_player:
                 captured_piece = piece
                 captured = piece.captured
                 captured_piece.captured = True
