@@ -6,7 +6,7 @@ from source.pieces.Move import Move
 
 class Bishop(Piece):
     def __init__(self, owner, board_position, display_position, color):
-        super().__init__(owner, board_position, display_position, color, constants.Type.BISHOP, 3)
+        super().__init__(owner, board_position, display_position, color, constants.Type.BISHOP, 'B', 3)
         self.image = pg.image.load(
             'assets\\images\\pieces\\wb100.png' if color == constants.Color.WHITE else 'assets\\images\\pieces\\bb100'
                                                                                        '.png')

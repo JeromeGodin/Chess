@@ -50,6 +50,8 @@ class Game:
         self.color_animations = []
         self.move_animations = []
 
+        self.move_history = []
+
     @staticmethod
     def __initialize_screen(size):
         return pg.Surface(size, pg.SRCALPHA)
@@ -100,6 +102,7 @@ class Game:
         captured_piece = None
         target_image_position = None
         castling = False
+        original_board_position = self.selected_piece.board_position
 
         # Castling
         if self.selected_piece.piece == constants.Type.KING and abs(
@@ -178,6 +181,9 @@ class Game:
                 pg.mixer.Sound.play(self.castle_sound)
         else:
             pg.mixer.Sound.play(self.check_sound)
+
+        # Record the move
+        self.__record_move(self.selected_piece, original_board_position, captured_piece is not None, is_check, pieces)
 
         # Pass the turn
         self.possible_moves = []
@@ -429,7 +435,8 @@ class Game:
                 break
 
         if checkmated_player is not None:
-            self.result = (GameResult.VICTORY if checkmated_player.number != 0 else GameResult.DEFEAT, GameFinish.CHECKMATE)
+            self.result = (
+                GameResult.VICTORY if checkmated_player.number != 0 else GameResult.DEFEAT, GameFinish.CHECKMATE)
 
         return checkmated_player is not None
 
@@ -444,6 +451,43 @@ class Game:
             self.result = (GameResult.DRAW, GameFinish.STALEMATE)
 
         return stalemated_player is not None
+
+    def __record_move(self, piece, original_board_position, is_capture, is_check, pieces):
+        is_ambiguous = False
+        position = self.board.files[piece.board_position[1]] + self.board.ranks[piece.board_position[0]]
+        capture = 'x' if is_capture else ''
+        check = '+' if is_check else ''
+        identifier = ''
+
+        if piece.piece == constants.Type.ROOK or piece.piece == constants.Type.KNIGHT:
+            for twin_piece in pieces:
+                if twin_piece.owner == piece.owner and twin_piece.piece == piece.piece and twin_piece != piece:
+                    new_position = piece.board_position
+                    piece.board_position = original_board_position
+
+                    for twin_move in twin_piece.get_possible_moves(pieces, self.board):
+                        if twin_move[0] == new_position:
+                            is_ambiguous = True
+                            break
+
+                    piece.board_position = new_position
+
+                    if is_ambiguous:
+                        if twin_piece.board_position[1] == original_board_position[1]:
+                            identifier = self.board.ranks[original_board_position[0]]
+                        else:
+                            identifier = self.board.files[original_board_position[1]]
+        elif piece.piece == constants.Type.PAWN and is_capture:
+            identifier = self.board.files[piece.board_position[1]]
+
+        move = piece.name + identifier + capture + position + check
+
+        if self.active_player == 0:
+            self.move_history.append((move.lower(), ''))
+        else:
+            self.move_history[-1] = (self.move_history[-1][0], move.lower())
+
+        print(self.move_history)
 
     def update_screen(self):
         # self.screen.fill((0, 0, 0, 255))

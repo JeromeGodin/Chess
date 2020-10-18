@@ -6,7 +6,7 @@ from source.pieces.Move import Move
 
 class Knight(Piece):
     def __init__(self, owner, board_position, display_position, color):
-        super().__init__(owner, board_position, display_position, color, constants.Type.KNIGHT, 3)
+        super().__init__(owner, board_position, display_position, color, constants.Type.KNIGHT, 'N', 3)
         self.image = pg.image.load(
             'assets\\images\\pieces\\wn100.png' if color == constants.Color.WHITE else 'assets\\images\\pieces\\bn100'
                                                                                        '.png')

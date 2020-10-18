@@ -6,7 +6,7 @@ from source.pieces.Move import Move
 
 class Pawn(Piece):
     def __init__(self, owner, board_position, display_position, color):
-        super().__init__(owner, board_position, display_position, color, constants.Type.PAWN, 1)
+        super().__init__(owner, board_position, display_position, color, constants.Type.PAWN, '', 1)
         self.image = pg.image.load(
             'assets\\images\\pieces\\wp100.png' if color == constants.Color.WHITE else 'assets\\images\\pieces\\bp100'
                                                                                        '.png')

@@ -5,7 +5,7 @@ from source.game.Tile import Tile
 class Board:
     def __init__(self, board_size, tile_size, white_color, black_color, red_color, horizontal_offset, vertical_offset):
         self.size = board_size
-        self.ranks = [str(i) for i in range(board_size[0] + 1)]
+        self.ranks = [str(i) for i in range(board_size[0], 1, -1)]
         self.files = letters[:board_size[1]]
         self.tiles = self.__initialize_tiles(board_size, tile_size, white_color, black_color,
                                              horizontal_offset, vertical_offset)

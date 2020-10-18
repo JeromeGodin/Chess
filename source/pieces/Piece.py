@@ -5,7 +5,7 @@ from source.pieces import Constants as constants
 
 
 class Piece(ABC):
-    def __init__(self, owner, board_position, display_position, color, piece, value):
+    def __init__(self, owner, board_position, display_position, color, piece, name, value):
         self.owner = owner
         self.board_position = board_position
         self.display_position = display_position
@@ -17,6 +17,7 @@ class Piece(ABC):
         self.has_moved = False
         self.captured = False
         self.value = value
+        self.name = name
         self._available_moves = []
 
     @staticmethod
