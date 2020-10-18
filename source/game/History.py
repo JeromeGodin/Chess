@@ -32,11 +32,13 @@ class GameHistory:
                         else:
                             identifier = self.board.files[original_board_position[1]]
         elif piece.piece == constants.Type.PAWN and is_capture:
-            identifier = self.board.files[piece.board_position[1]]
+            identifier = self.board.files[original_board_position[1]]
 
-        move = piece.name + identifier + capture + position + check
+        move = piece.name + identifier.lower() + capture + position.lower() + check
 
         if piece.owner == 0:
-            self.move_history.append((move.lower(), ''))
+            self.move_history.append((move, ''))
         else:
-            self.move_history[-1] = (self.move_history[-1][0], move.lower())
+            self.move_history[-1] = (self.move_history[-1][0], move)
+
+        print(self.move_history)
