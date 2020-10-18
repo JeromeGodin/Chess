@@ -46,3 +46,21 @@ class GameHistory:
             self.move_history[-1] = (self.move_history[-1][0], self.move_history[-1][1].replace('+', '#'))
         else:
             self.move_history[-1] = (self.move_history[-1][0].replace('+', '#'), self.move_history[-1][1])
+
+    def check_for_repetition(self):
+        repetition = False
+
+        if len(self.move_history) >= 6:
+            white_index = -1
+            black_index = -1 if self.move_history[-1][1] != '' else -2
+            repetition = True
+
+            for index in range(2, 5, 2):
+                if self.move_history[white_index][0] != self.move_history[white_index - index][0] or \
+                        self.move_history[white_index - 1][0] != self.move_history[white_index - 1 - index][0] or \
+                        self.move_history[black_index][1] != self.move_history[black_index - index][1] or \
+                        self.move_history[black_index - 1][1] != self.move_history[black_index - 1 - index][1]:
+                    repetition = False
+                    break
+
+        return repetition

@@ -436,7 +436,7 @@ class Game:
         if self.__check_if_checkmate(pieces):
             self.move_history.add_checkmate_mark()
             self.status = GameStatus.OVER
-        elif self.__check_if_stalemate(pieces):
+        elif self.__check_if_stalemate(pieces) or self.__check_if_repetition():
             self.status = GameStatus.OVER
 
     def __check_if_checkmate(self, pieces):
@@ -463,6 +463,14 @@ class Game:
             self.result = (GameResult.DRAW, GameFinish.STALEMATE)
 
         return stalemated_player is not None
+
+    def __check_if_repetition(self):
+        repetition = self.move_history.check_for_repetition()
+
+        if repetition:
+            self.result = (GameResult.DRAW, GameFinish.REPETITION)
+
+        return repetition
 
     def update_screen(self):
         # self.screen.fill((0, 0, 0, 255))
