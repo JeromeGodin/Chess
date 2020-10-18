@@ -65,6 +65,7 @@ class Game:
         self.capture_sound = pg.mixer.Sound("assets\\sounds\\capture.wav")
         self.check_sound = pg.mixer.Sound("assets\\sounds\\check.wav")
         self.castle_sound = pg.mixer.Sound("assets\\sounds\\castle.wav")
+        self.promotion_sound = pg.mixer.Sound("assets\\sounds\\promote.wav")
         self.illegal_sound = pg.mixer.Sound("assets\\sounds\\illegal.wav")
         self.game_start_sound = pg.mixer.Sound("assets\\sounds\\game-start.wav")
 
@@ -245,7 +246,21 @@ class Game:
                                                       piece.board_position[1])))
 
     def __end_promotion(self, piece_choice):
+        pieces = []
+        is_check = False
+
         self.__promote_piece(self.__promoting_piece, piece_choice)
+
+        for player in self.players:
+            pieces.extend(player.pieces)
+
+        for piece in pieces:
+            if piece.piece == constants.Type.KING and piece.owner != self.active_player:
+                if piece.is_attacked(pieces, self.board):
+                    is_check = True
+                    break
+
+        pg.mixer.Sound.play(self.check_sound if is_check else self.promotion_sound)
 
         self.__promoting_piece = None
         self.__promotion_window_position = None
