@@ -44,5 +44,5 @@ class GameFinish(Enum):
     STALEMATE = 1
     REPETITION = 2
     INSUFFICIENT_MATERIAL = 3
-    FIFTY_MOVES = 4
+    MAX_MOVES = 4
     TIMEOUT = 5

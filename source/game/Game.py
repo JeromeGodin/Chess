@@ -20,7 +20,7 @@ class Game:
     def __init__(self, player_count, display_size, tile_size, board_size, white_color, black_color, illegal_color,
                  last_move_color, possible_move_radius, possible_capture_radius, possible_move_color,
                  possible_capture_width, promotion_window_color, promotion_window_hover_color,
-                 hovered_tile_border_width, horizontal_offset=0, vertical_offset=0):
+                 hovered_tile_border_width, max_moves=50, horizontal_offset=0, vertical_offset=0):
         self.board = Board(board_size, tile_size, white_color, black_color, illegal_color, last_move_color,
                            horizontal_offset, vertical_offset)
         self.players = self.__initialize_players(player_count, board_size, tile_size, horizontal_offset,
@@ -39,6 +39,9 @@ class Game:
         self.active_player = 0
         self.status = GameStatus.MENU
         self.result = None
+
+        self.max_moves = max_moves
+        self.move_counter = 0
 
         self.possible_move_radius = possible_move_radius
         self.possible_move_color = possible_move_color
@@ -193,6 +196,12 @@ class Game:
         # Record the move
         self.move_history.record_move(self.selected_piece, original_board_position, captured_piece is not None,
                                       is_check, pieces)
+
+        # Increment or reset the move counter
+        if self.selected_piece.piece != constants.Type.PAWN and captured_piece is None:
+            self.move_counter = self.move_counter + 1
+        else:
+            self.move_counter = 0
 
         # Pass the turn
         self.possible_moves = []
@@ -436,7 +445,7 @@ class Game:
         if self.__check_if_checkmate(pieces):
             self.move_history.add_checkmate_mark()
             self.status = GameStatus.OVER
-        elif self.__check_if_stalemate(pieces) or self.__check_if_repetition():
+        elif self.__check_if_stalemate(pieces) or self.__check_if_repetition() or self.__check_if_max_moves():
             self.status = GameStatus.OVER
 
     def __check_if_checkmate(self, pieces):
@@ -471,6 +480,12 @@ class Game:
             self.result = (GameResult.DRAW, GameFinish.REPETITION)
 
         return repetition
+
+    def __check_if_max_moves(self):
+        if self.move_counter >= self.max_moves:
+            self.result = (GameResult.DRAW, GameFinish.MAX_MOVES)
+
+        return self.move_counter >= self.max_moves
 
     def update_screen(self):
         # self.screen.fill((0, 0, 0, 255))
