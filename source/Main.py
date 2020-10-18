@@ -22,7 +22,7 @@ def main():
     # Initializing a new game
     game = Game(game_settings.PLAYER_COUNT, app_settings.DISPLAY_SIZE, game_settings.TILE_SIZE_IN_PIXELS,
                 game_settings.BOARD_SIZE, game_settings.BEIGE, game_settings.GREEN, game_settings.RED,
-                game_settings.POSSIBLE_MOVE_RADIUS, game_settings.POSSIBLE_CAPTURE_RADIUS,
+                game_settings.BLUE, game_settings.POSSIBLE_MOVE_RADIUS, game_settings.POSSIBLE_CAPTURE_RADIUS,
                 game_settings.POSSIBLE_MOVE_COLOR, game_settings.POSSIBLE_CAPTURE_WIDTH,
                 game_settings.PROMOTION_WINDOW_COLOR, game_settings.PROMOTION_WINDOW_HOVER_COLOR,
                 game_settings.HOVERED_TILE_BORDER_WIDTH)

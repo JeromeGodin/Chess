@@ -17,12 +17,12 @@ from source.pieces.Rook import Rook
 
 
 class Game:
-    def __init__(self, player_count, display_size, tile_size, board_size, white_color, black_color, red_color,
-                 possible_move_radius, possible_capture_radius, possible_move_color, possible_capture_width,
-                 promotion_window_color, promotion_window_hover_color, hovered_tile_border_width, horizontal_offset=0,
-                 vertical_offset=0):
-        self.board = Board(board_size, tile_size, white_color, black_color, red_color, horizontal_offset,
-                           vertical_offset)
+    def __init__(self, player_count, display_size, tile_size, board_size, white_color, black_color, illegal_color,
+                 last_move_color, possible_move_radius, possible_capture_radius, possible_move_color,
+                 possible_capture_width, promotion_window_color, promotion_window_hover_color,
+                 hovered_tile_border_width, horizontal_offset=0, vertical_offset=0):
+        self.board = Board(board_size, tile_size, white_color, black_color, illegal_color, last_move_color,
+                           horizontal_offset, vertical_offset)
         self.players = self.__initialize_players(player_count, board_size, tile_size, horizontal_offset,
                                                  vertical_offset)
         self.screen = self.__initialize_screen(display_size)
@@ -53,6 +53,7 @@ class Game:
         self.color_animations = []
         self.move_animations = []
 
+        self.last_move = None
         self.move_history = GameHistory(self.board)
 
     @staticmethod
@@ -106,6 +107,10 @@ class Game:
         target_image_position = None
         castling = False
         original_board_position = self.selected_piece.board_position
+
+        self.last_move = (
+            self.board.tiles[self.selected_piece.board_position[0]][self.selected_piece.board_position[1]],
+            tile)
 
         # Castling
         if self.selected_piece.piece == constants.Type.KING and abs(
@@ -412,7 +417,7 @@ class Game:
                                         tile = self.board.tiles[piece.board_position[0]][piece.board_position[1]]
                                         self.__add_animation(
                                             ColorAnimation(tile, type(tile), tile.color,
-                                                           [tile.color, self.board.red_color],
+                                                           [tile.color, self.board.illegal_color],
                                                            anim_settings.TILE_FLASHING_DURATION,
                                                            anim_settings.TILE_FLASHING_FREQUENCY),
                                             self.color_animations)
@@ -463,6 +468,10 @@ class Game:
             for tile in tile_row:
                 if not tile.currently_animated:
                     pg.draw.rect(self.screen, tile.color, tile.background)
+
+        if self.last_move is not None:
+            pg.draw.rect(self.screen, self.board.last_move_color, self.last_move[0].background)
+            pg.draw.rect(self.screen, self.board.last_move_color, self.last_move[1].background)
 
         self.__run_background_animation()
 
