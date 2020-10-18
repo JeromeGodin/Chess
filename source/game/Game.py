@@ -82,13 +82,15 @@ class Game:
     def __move_selected_piece(self, tile, pieces, is_animated):
         is_check = False
         captured_piece = None
+        target_image_position = None
         castling = False
 
         # Castling
         if self.selected_piece.piece == constants.Type.KING and abs(
                 self.selected_piece.board_position[1] - tile.board_position[1]) > 1:
-            move_direction_value = int(math.floor((self.selected_piece.board_position[1] - tile.board_position[1]) / abs(
-                self.selected_piece.board_position[1] - tile.board_position[1])))
+            move_direction_value = int(
+                math.floor((self.selected_piece.board_position[1] - tile.board_position[1]) / abs(
+                    self.selected_piece.board_position[1] - tile.board_position[1])))
             rook = self.selected_piece.get_castling_rook(move_direction_value, pieces, self.board)
             rook_tile = self.board.tiles[rook.board_position[0]][
                 tile.board_position[1] + move_direction_value]
@@ -100,15 +102,36 @@ class Game:
                               anim_settings.PIECE_MOVE_ERASE_TARGET), self.move_animations)
 
             castling = True
-        else:
-            # Check for capture
+        # Mark as en passant
+        elif self.selected_piece.piece == constants.Type.PAWN and abs(
+                self.selected_piece.board_position[0] - tile.board_position[0]) > 1:
+            self.selected_piece.could_get_captured_en_passant = True
+        # Check if pawn capture is en passant
+        elif self.selected_piece.piece == constants.Type.PAWN and abs(
+                self.selected_piece.board_position[0] - tile.board_position[0]) == 1 and abs(
+                self.selected_piece.board_position[1] - tile.board_position[1]) == 1:
+            is_en_passant = True
+
             for piece in pieces:
                 if piece.board_position == tile.board_position:
-                    captured_piece = piece
+                    is_en_passant = False
                     break
 
-            if captured_piece is not None:
+            if is_en_passant:
+                captured_piece = self.selected_piece.get_en_passant_pawn(
+                    tile.board_position[1] - self.selected_piece.board_position[1], pieces)
+                target_image_position = captured_piece.display_position
+
                 captured_piece.captured = True
+
+        # Check for capture
+        for piece in pieces:
+            if piece.board_position == tile.board_position:
+                captured_piece = piece
+                break
+
+        if captured_piece is not None:
+            captured_piece.captured = True
 
         # Move and animate piece if necessary
         self.selected_piece.move(tile, not is_animated)
@@ -117,7 +140,7 @@ class Game:
             self.__add_animation(
                 MoveAnimation(self.selected_piece, type(self.selected_piece), self.selected_piece.display_position,
                               tile.display_position, anim_settings.PIECE_MOVE_DURATION,
-                              captured_piece.image if captured_piece is not None else None,
+                              captured_piece.image if captured_piece is not None else None, target_image_position,
                               anim_settings.PIECE_MOVE_ERASE_TARGET), self.move_animations)
 
         # Check for checks
@@ -153,7 +176,7 @@ class Game:
         for animation in self.move_animations:
             animation.animate()
             if animation.display_target_image:
-                self.screen.blit(animation.target_image, animation.target_position)
+                self.screen.blit(animation.target_image, animation.target_image_position)
             self.screen.blit(animation.element.image, animation.element.display_position)
 
         self.__clear_animations(self.move_animations)
@@ -208,6 +231,9 @@ class Game:
 
     def pass_turn(self):
         self.active_player = (self.active_player + 1) % self.player_count
+        for piece in self.players[self.active_player].pieces:
+            if piece.piece == constants.Type.PAWN:
+                piece.could_get_captured_en_passant = False
 
     def click(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
