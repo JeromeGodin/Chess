@@ -41,4 +41,8 @@ class GameHistory:
         else:
             self.move_history[-1] = (self.move_history[-1][0], move)
 
-        print(self.move_history)
+    def add_checkmate_mark(self):
+        if self.move_history[-1][1] != '':
+            self.move_history[-1] = (self.move_history[-1][0], self.move_history[-1][1].replace('+', '#'))
+        else:
+            self.move_history[-1] = (self.move_history[-1][0].replace('+', '#'), self.move_history[-1][1])

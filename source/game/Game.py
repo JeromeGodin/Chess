@@ -433,7 +433,10 @@ class Game:
         for player in self.players:
             pieces.extend(player.pieces)
 
-        if self.__check_if_checkmate(pieces) or self.__check_if_stalemate(pieces):
+        if self.__check_if_checkmate(pieces):
+            self.move_history.add_checkmate_mark()
+            self.status = GameStatus.OVER
+        elif self.__check_if_stalemate(pieces):
             self.status = GameStatus.OVER
 
     def __check_if_checkmate(self, pieces):
