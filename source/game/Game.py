@@ -472,9 +472,6 @@ class Game:
 
                     self.dragged_piece = None
 
-    def __display_result_window(self):
-        print(self.result)
-
     def __check_if_game_is_over(self):
         pieces = []
         for player in self.players:
@@ -581,9 +578,6 @@ class Game:
 
         if self.__promotion_in_progress:
             self.__display_promotion_window()
-
-        if self.status == GameStatus.OVER:
-            self.__display_result_window()
 
     def click(self, event):
         if self.status == GameStatus.IN_PROGRESS:
