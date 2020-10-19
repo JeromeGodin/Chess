@@ -29,19 +29,19 @@ class Player:
                 (1 - 2 * player) * int(math.floor((display_size[1] - tile_size) / 2)))
 
         # Pawns
-        for pawn in range(board_size[1]):
-            pawn_position = (horizontal_offset + pawn * tile_size, player_pawns_y_position)
-            pieces.append(
-                Pawn(player, (board_size[0] - 2 if not player else 1, pawn), pawn_position, color))
+        #for pawn in range(board_size[1]):
+        #    pawn_position = (horizontal_offset + pawn * tile_size, player_pawns_y_position)
+        #    pieces.append(
+        #        Pawn(player, (board_size[0] - 2 if not player else 1, pawn), pawn_position, color))
 
         # Rooks
-        pieces.append(
-            Rook(player, (board_size[0] - 1 if not player else 0, 0), (horizontal_offset, player_pieces_y_position),
-                 color))
-        pieces.append(
-            Rook(player, (board_size[0] - 1 if not player else 0, board_size[1] - 1),
-                 (horizontal_offset + display_size[0] - 1 * tile_size, player_pieces_y_position),
-                 color))
+        #pieces.append(
+        #    Rook(player, (board_size[0] - 1 if not player else 0, 0), (horizontal_offset, player_pieces_y_position),
+        #         color))
+        #pieces.append(
+        #    Rook(player, (board_size[0] - 1 if not player else 0, board_size[1] - 1),
+        #         (horizontal_offset + display_size[0] - 1 * tile_size, player_pieces_y_position),
+        #         color))
 
         # Knights
         pieces.append(
@@ -56,15 +56,15 @@ class Player:
         pieces.append(
             Bishop(player, (board_size[0] - 1 if not player else 0, 2),
                    (horizontal_offset + 2 * tile_size, player_pieces_y_position), color))
-        pieces.append(
-            Bishop(player, (board_size[0] - 1 if not player else 0, board_size[1] - 3),
-                   (horizontal_offset + display_size[0] - 3 * tile_size, player_pieces_y_position),
-                   color))
+        #pieces.append(
+        #    Bishop(player, (board_size[0] - 1 if not player else 0, board_size[1] - 3),
+        #          (horizontal_offset + display_size[0] - 3 * tile_size, player_pieces_y_position),
+        #           color))
 
         # Queen
-        pieces.append(
-            Queen(player, (board_size[0] - 1 if not player else 0, 3),
-                  (horizontal_offset + 3 * tile_size, player_pieces_y_position), color))
+        #pieces.append(
+        #    Queen(player, (board_size[0] - 1 if not player else 0, 3),
+        #          (horizontal_offset + 3 * tile_size, player_pieces_y_position), color))
 
         # King
         pieces.append(
@@ -113,3 +113,20 @@ class Player:
 
     def get_is_in_stalemate(self, pieces, board):
         return not self.get_is_in_check(pieces, board) and len(self.__get_possible_moves(pieces, board)) == 0
+
+    def get_has_enough_material(self):
+        only_has_knights = False
+        material = 0
+
+        for piece in self.pieces:
+            if not piece.captured:
+                material = material + piece.value
+
+        if material >= 6:
+            only_has_knights = True
+            for piece in self.pieces:
+                if not piece.captured and piece.piece != constants.Type.KNIGHT and piece.piece != constants.Type.KING:
+                    only_has_knights = False
+                    break
+
+        return material > 3 and not only_has_knights

@@ -445,7 +445,8 @@ class Game:
         if self.__check_if_checkmate(pieces):
             self.move_history.add_checkmate_mark()
             self.status = GameStatus.OVER
-        elif self.__check_if_stalemate(pieces) or self.__check_if_repetition() or self.__check_if_max_moves():
+        elif self.__check_if_stalemate(pieces) or self.__check_if_repetition() or \
+                self.__check_if_max_moves() or self.__check_if_insufficient_material():
             self.status = GameStatus.OVER
 
     def __check_if_checkmate(self, pieces):
@@ -486,6 +487,19 @@ class Game:
             self.result = (GameResult.DRAW, GameFinish.MAX_MOVES)
 
         return self.move_counter >= self.max_moves
+
+    def __check_if_insufficient_material(self):
+        insufficient_material = True
+
+        for player in self.players:
+            if player.get_has_enough_material():
+                insufficient_material = False
+                break
+
+        if insufficient_material:
+            self.result = (GameResult.DRAW, GameFinish.INSUFFICIENT_MATERIAL)
+
+        return insufficient_material
 
     def update_screen(self):
         # self.screen.fill((0, 0, 0, 255))
