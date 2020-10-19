@@ -36,7 +36,7 @@ class GameHistory:
 
         move = piece.name + identifier + capture + position + check
 
-        if piece.owner == 0:
+        if piece.color == constants.Color.WHITE:
             self.move_history.append((move, ''))
         else:
             self.move_history[-1] = (self.move_history[-1][0], move)

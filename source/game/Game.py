@@ -17,13 +17,15 @@ from source.pieces.Rook import Rook
 
 
 class Game:
-    def __init__(self, player_count, display_size, tile_size, board_size, white_color, black_color, illegal_color,
+    def __init__(self, player_count, player_color, display_size, tile_size, board_size, white_color, black_color,
+                 illegal_color,
                  last_move_color, possible_move_radius, possible_capture_radius, possible_move_color,
                  possible_capture_width, promotion_window_color, promotion_window_hover_color,
                  hovered_tile_border_width, max_moves=50, horizontal_offset=0, vertical_offset=0):
-        self.board = Board(board_size, tile_size, white_color, black_color, illegal_color, last_move_color,
+        self.board = Board(player_color, board_size, tile_size, white_color, black_color, illegal_color,
+                           last_move_color,
                            horizontal_offset, vertical_offset)
-        self.players = self.__initialize_players(player_count, board_size, tile_size, horizontal_offset,
+        self.players = self.__initialize_players(player_count, player_color, board_size, tile_size, horizontal_offset,
                                                  vertical_offset)
         self.screen = self.__initialize_screen(display_size)
         self.__initialized_sounds()
@@ -37,7 +39,7 @@ class Game:
         self.__promotion_pieces_positions = []
 
         self.player_count = player_count
-        self.active_player = 0
+        self.active_player = 0 if player_color == constants.Color.WHITE else 1
         self.status = GameStatus.MENU
         self.result = None
 
@@ -65,12 +67,14 @@ class Game:
         return pg.Surface(size, pg.SRCALPHA)
 
     @staticmethod
-    def __initialize_players(player_count, board_size, tile_size, horizontal_offset, vertical_offset):
+    def __initialize_players(player_count, player_color, board_size, tile_size, horizontal_offset, vertical_offset):
         players = []
+        colors = [player_color,
+                  constants.Color.BLACK if player_color == constants.Color.WHITE else constants.Color.WHITE]
 
         for player in range(player_count):
             players.append(
-                Player(player, constants.Color(player), board_size,
+                Player(player, colors[player], board_size,
                        (board_size[1] * tile_size, board_size[0] * tile_size),
                        tile_size, horizontal_offset, vertical_offset))
 
