@@ -27,6 +27,7 @@ class Game:
                                                  vertical_offset)
         self.screen = self.__initialize_screen(display_size)
         self.__initialized_sounds()
+        self.__initialize_font()
 
         self.promotion_window_color = promotion_window_color
         self.promotion_window_hover_color = promotion_window_hover_color
@@ -83,6 +84,23 @@ class Game:
         self.promotion_sound = pg.mixer.Sound("assets\\sounds\\promote.wav")
         self.illegal_sound = pg.mixer.Sound("assets\\sounds\\illegal.wav")
         self.game_start_sound = pg.mixer.Sound("assets\\sounds\\game-start.wav")
+
+    def __initialize_font(self):
+        self.font = pg.font.Font("assets\\fonts\\Montserrat\\Montserrat-Black.ttf", 18)
+        self.rank_names = []
+        self.file_names = []
+
+        is_white = False
+        for rank in self.board.ranks:
+            self.rank_names.append(
+                self.font.render(rank, True, self.board.white_color if is_white else self.board.black_color))
+            is_white = not is_white
+
+        is_white = True
+        for file in self.board.files:
+            self.file_names.append(
+                self.font.render(file, True, self.board.white_color if is_white else self.board.black_color))
+            is_white = not is_white
 
     @staticmethod
     def __is_position_in_tile(position, board_tile):
@@ -208,6 +226,22 @@ class Game:
 
         if not self.__promotion_in_progress:
             self.__pass_turn()
+
+    def __display_ranks(self):
+        index = 0
+
+        for rank in self.rank_names:
+            self.screen.blit(rank, (self.board.tiles[index][0].display_position[0] + 5,
+                                    self.board.tiles[index][0].display_position[1]))
+            index = index + 1
+
+    def __display_files(self):
+        index = 0
+
+        for file in self.file_names:
+            self.screen.blit(file, (self.board.tiles[self.board.size[1] - 1][index].display_position[0] + 85,
+                                    self.board.tiles[self.board.size[1] - 1][index].display_position[1] + 75))
+            index = index + 1
 
     def __run_background_animation(self):
         for animation in self.color_animations:
@@ -512,6 +546,9 @@ class Game:
         if self.last_move is not None:
             pg.draw.rect(self.screen, self.board.last_move_color, self.last_move[0].background)
             pg.draw.rect(self.screen, self.board.last_move_color, self.last_move[1].background)
+
+        self.__display_ranks()
+        self.__display_files()
 
         self.__run_background_animation()
 

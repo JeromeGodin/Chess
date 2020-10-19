@@ -1,4 +1,4 @@
-from string import ascii_uppercase as letters
+from string import ascii_lowercase as letters
 from source.game.Tile import Tile
 
 

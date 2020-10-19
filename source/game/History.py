@@ -34,7 +34,7 @@ class GameHistory:
         elif piece.piece == constants.Type.PAWN and is_capture:
             identifier = self.board.files[original_board_position[1]]
 
-        move = piece.name + identifier.lower() + capture + position.lower() + check
+        move = piece.name + identifier + capture + position + check
 
         if piece.owner == 0:
             self.move_history.append((move, ''))
