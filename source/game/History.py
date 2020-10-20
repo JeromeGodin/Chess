@@ -17,9 +17,10 @@ class GameHistory:
             main_player_color = constants.Color.WHITE if (not piece.owner and piece.color == constants.Color.WHITE) or (
                     piece.color == constants.Color.BLACK and piece.owner) else constants.Color.BLACK
 
-            castle = 'O-O' if (original_board_position[1] - piece.board_position[
-                1] < 0 and main_player_color == constants.Color.WHITE) or (original_board_position[1] - piece.board_position[
-                1] > 0 and main_player_color == constants.Color.BLACK) else 'O-O-O'
+            castle = 'O-O' if (original_board_position[1] - piece.board_position[1] < 0 and
+                               main_player_color == constants.Color.WHITE) or \
+                              (original_board_position[1] - piece.board_position[1] > 0 and
+                               main_player_color == constants.Color.BLACK) else 'O-O-O'
             move = castle + check
         else:
             if piece.piece == constants.Type.ROOK or piece.piece == constants.Type.KNIGHT:
