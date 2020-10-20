@@ -13,33 +13,44 @@ class GameHistory:
         check = '+' if is_check else ''
         identifier = ''
 
-        if piece.piece == constants.Type.ROOK or piece.piece == constants.Type.KNIGHT:
-            for twin_piece in pieces:
-                if twin_piece.owner == piece.owner and twin_piece.piece == piece.piece and twin_piece != piece:
-                    new_position = piece.board_position
-                    piece.board_position = original_board_position
+        if piece.piece == constants.Type.KING and abs(original_board_position[1] - piece.board_position[1]) > 1:
+            main_player_color = constants.Color.WHITE if (not piece.owner and piece.color == constants.Color.WHITE) or (
+                    piece.color == constants.Color.BLACK and piece.owner) else constants.Color.BLACK
 
-                    for twin_move in twin_piece.get_possible_moves(pieces, self.board):
-                        if twin_move[0] == new_position:
-                            is_ambiguous = True
-                            break
+            castle = 'O-O' if (original_board_position[1] - piece.board_position[
+                1] < 0 and main_player_color == constants.Color.WHITE) or (original_board_position[1] - piece.board_position[
+                1] > 0 and main_player_color == constants.Color.BLACK) else 'O-O-O'
+            move = castle + check
+        else:
+            if piece.piece == constants.Type.ROOK or piece.piece == constants.Type.KNIGHT:
+                for twin_piece in pieces:
+                    if twin_piece.owner == piece.owner and twin_piece.piece == piece.piece and twin_piece != piece:
+                        new_position = piece.board_position
+                        piece.board_position = original_board_position
 
-                    piece.board_position = new_position
+                        for twin_move in twin_piece.get_possible_moves(pieces, self.board):
+                            if twin_move[0] == new_position:
+                                is_ambiguous = True
+                                break
 
-                    if is_ambiguous:
-                        if twin_piece.board_position[1] == original_board_position[1]:
-                            identifier = self.board.ranks[original_board_position[0]]
-                        else:
-                            identifier = self.board.files[original_board_position[1]]
-        elif piece.piece == constants.Type.PAWN and is_capture:
-            identifier = self.board.files[original_board_position[1]]
+                        piece.board_position = new_position
 
-        move = piece.name + identifier + capture + position + check
+                        if is_ambiguous:
+                            if twin_piece.board_position[1] == original_board_position[1]:
+                                identifier = self.board.ranks[original_board_position[0]]
+                            else:
+                                identifier = self.board.files[original_board_position[1]]
+            elif piece.piece == constants.Type.PAWN and is_capture:
+                identifier = self.board.files[original_board_position[1]]
+
+            move = piece.name + identifier + capture + position + check
 
         if piece.color == constants.Color.WHITE:
             self.move_history.append((move, ''))
         else:
             self.move_history[-1] = (self.move_history[-1][0], move)
+
+        print(move)
 
     def add_checkmate_mark(self):
         if self.move_history[-1][1] != '':

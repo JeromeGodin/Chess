@@ -21,12 +21,16 @@ class Player:
     def __initialize_pieces(player, board_size, display_size, tile_size, horizontal_offset, vertical_offset,
                             color):
         pieces = []
+        main_player_color = constants.Color.WHITE if (not player and color == constants.Color.WHITE) or (
+                    color == constants.Color.BLACK and player) else constants.Color.BLACK
 
         # Positions
         player_pawns_y_position = vertical_offset + int(math.floor((display_size[1] - tile_size) / 2)) + (
                 (1 - 2 * player) * int(math.floor((display_size[1] - 3 * tile_size) / 2)))
         player_pieces_y_position = vertical_offset + int(math.floor((display_size[1] - tile_size) / 2)) + (
                 (1 - 2 * player) * int(math.floor((display_size[1] - tile_size) / 2)))
+        queen_position = 3 if main_player_color == constants.Color.WHITE else board_size[1] - 4
+        king_position = board_size[1] - 4 if main_player_color == constants.Color.WHITE else 3
 
         # Pawns
         for pawn in range(board_size[1]):
@@ -58,18 +62,18 @@ class Player:
                    (horizontal_offset + 2 * tile_size, player_pieces_y_position), color))
         pieces.append(
             Bishop(player, (board_size[0] - 1 if not player else 0, board_size[1] - 3),
-                  (horizontal_offset + display_size[0] - 3 * tile_size, player_pieces_y_position),
+                   (horizontal_offset + display_size[0] - 3 * tile_size, player_pieces_y_position),
                    color))
 
         # Queen
         pieces.append(
-            Queen(player, (board_size[0] - 1 if not player else 0, 3),
-                  (horizontal_offset + 3 * tile_size, player_pieces_y_position), color))
+            Queen(player, (board_size[0] - 1 if not player else 0, queen_position),
+                  (horizontal_offset + queen_position * tile_size, player_pieces_y_position), color))
 
         # King
         pieces.append(
-            King(player, (board_size[0] - 1 if not player else 0, board_size[1] - 4),
-                 (horizontal_offset + display_size[0] - 4 * tile_size, player_pieces_y_position),
+            King(player, (board_size[0] - 1 if not player else 0, king_position),
+                 (horizontal_offset + king_position * tile_size, player_pieces_y_position),
                  color))
 
         return pieces
