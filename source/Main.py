@@ -43,7 +43,7 @@ def main():
     display = initialize_display()
     clock = pg.time.Clock()
     game_result_window = None
-    player_color = Color.BLACK
+    player_color = Color.WHITE
 
     # Initializing a new game
     game = get_new_game(player_color)
