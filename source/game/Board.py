@@ -6,7 +6,7 @@ from source.pieces.Constants import Color
 
 class Board:
     def __init__(self, player_color, board_size, tile_size, white_color, black_color, illegal_color, last_move_color,
-                 horizontal_offset, vertical_offset):
+                 horizontal_offset=0, vertical_offset=0):
         self.size = board_size
         self.ranks = self.__initialize_ranks(player_color, board_size)
         self.files = self.__initialize_files(player_color, board_size)

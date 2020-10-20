@@ -3,8 +3,6 @@ import math
 from source.game.GameSettings import GameStatus
 from source.game.GameSettings import GameResult
 from source.game.GameSettings import GameFinish
-from source.game.Board import Board
-from source.game.Player import Player
 from source.game.History import GameHistory
 from source.pieces import Constants as constants
 from source.animations.ColorAnimation import ColorAnimation
@@ -17,16 +15,11 @@ from source.pieces.Rook import Rook
 
 
 class Game:
-    def __init__(self, player_count, player_color, display_size, tile_size, board_size, white_color, black_color,
-                 illegal_color,
-                 last_move_color, possible_move_radius, possible_capture_radius, possible_move_color,
-                 possible_capture_width, promotion_window_color, promotion_window_hover_color,
-                 hovered_tile_border_width, max_moves=50, horizontal_offset=0, vertical_offset=0):
-        self.board = Board(player_color, board_size, tile_size, white_color, black_color, illegal_color,
-                           last_move_color,
-                           horizontal_offset, vertical_offset)
-        self.players = self.__initialize_players(player_count, player_color, board_size, tile_size, horizontal_offset,
-                                                 vertical_offset)
+    def __init__(self, board, players, display_size, possible_move_radius, possible_capture_radius,
+                 possible_move_color, possible_capture_width, promotion_window_color, promotion_window_hover_color,
+                 hovered_tile_border_width, max_moves=50):
+        self.board = board
+        self.players = players
         self.screen = self.__initialize_screen(display_size)
         self.__initialized_sounds()
         self.__initialize_font()
@@ -38,8 +31,8 @@ class Game:
         self.__promotion_window_position = None
         self.__promotion_pieces_positions = []
 
-        self.player_count = player_count
-        self.active_player = 0 if player_color == constants.Color.WHITE else 1
+        self.player_count = len(players)
+        self.active_player = 0 if self.players[0].color == constants.Color.WHITE else 1
         self.status = GameStatus.MENU
         self.result = None
 
@@ -66,20 +59,6 @@ class Game:
     def __initialize_screen(size):
         return pg.Surface(size, pg.SRCALPHA)
 
-    @staticmethod
-    def __initialize_players(player_count, player_color, board_size, tile_size, horizontal_offset, vertical_offset):
-        players = []
-        colors = [player_color,
-                  constants.Color.BLACK if player_color == constants.Color.WHITE else constants.Color.WHITE]
-
-        for player in range(player_count):
-            players.append(
-                Player(player, colors[player], board_size,
-                       (board_size[1] * tile_size, board_size[0] * tile_size),
-                       tile_size, horizontal_offset, vertical_offset))
-
-        return players
-
     def __initialized_sounds(self):
         self.move_sound = pg.mixer.Sound("assets\\sounds\\move.wav")
         self.capture_sound = pg.mixer.Sound("assets\\sounds\\capture.wav")
@@ -88,6 +67,7 @@ class Game:
         self.promotion_sound = pg.mixer.Sound("assets\\sounds\\promote.wav")
         self.illegal_sound = pg.mixer.Sound("assets\\sounds\\illegal.wav")
         self.game_start_sound = pg.mixer.Sound("assets\\sounds\\game-start.wav")
+        self.game_end_sound = pg.mixer.Sound("assets\\sounds\\game-end.wav")
 
     def __initialize_font(self):
         self.font = pg.font.Font("assets\\fonts\\Montserrat\\Montserrat-Black.ttf", 18)
@@ -483,6 +463,9 @@ class Game:
         elif self.__check_if_stalemate(pieces) or self.__check_if_repetition() or \
                 self.__check_if_max_moves() or self.__check_if_insufficient_material():
             self.status = GameStatus.OVER
+
+        if self.status == GameStatus.OVER:
+            pg.mixer.Sound.play(self.game_end_sound)
 
     def __check_if_checkmate(self, pieces):
         checkmated_player = None

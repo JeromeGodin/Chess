@@ -10,7 +10,7 @@ from source.pieces import Constants as constants
 
 
 class Player:
-    def __init__(self, number, color, board_size, display_size, tile_size, horizontal_offset, vertical_offset):
+    def __init__(self, number, color, board_size, display_size, tile_size, horizontal_offset=0, vertical_offset=0):
         self.number = number
         self.color = color
         self.pieces = self.__initialize_pieces(number, board_size, display_size, tile_size, horizontal_offset,
