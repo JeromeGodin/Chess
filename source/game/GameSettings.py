@@ -28,7 +28,7 @@ PROMOTION_WINDOW_HOVER_COLOR = (200, 200, 200, 255)
 
 
 class GameStatus(Enum):
-    MENU = 0
+    NOT_STARTED = 0
     IN_PROGRESS = 1
     OVER = 2
 

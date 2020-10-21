@@ -2,12 +2,12 @@ import pygame as pg
 import sys
 from source import ApplicationSettings as app_settings
 from source.game import GameSettings as game_settings
-from source.pieces import Constants as constants
 from source.game.Game import Game
 from source.game.Board import Board
 from source.game.Player import Player
-from source.game.GameResultWindow import GameResultWindow
 from source.pieces.Constants import Color
+from source.menu.GameResultWindow import GameResultWindow
+from source.menu.MenuConstants import GameResultResponse
 
 
 def initialize_display():
@@ -25,7 +25,7 @@ def get_new_game(player_color):
                   game_settings.YELLOW)
 
     players = []
-    player_colors = [player_color, constants.Color.BLACK if player_color == constants.Color.WHITE else constants.Color.WHITE]
+    player_colors = [player_color, Color.BLACK if player_color == Color.WHITE else Color.WHITE]
 
     for player in range(game_settings.PLAYER_COUNT):
         players.append(Player(player, player_colors[player], game_settings.BOARD_SIZE,
@@ -57,12 +57,18 @@ def main():
                 sys.exit()
 
             if event.type == pg.MOUSEBUTTONDOWN:
-                if game.status == game_settings.GameStatus.MENU:
+                if game.status == game_settings.GameStatus.NOT_STARTED:
                     print('Menu click')
                 elif game.status == game_settings.GameStatus.IN_PROGRESS:
                     game.click(event)
                 elif game.status == game_settings.GameStatus.OVER:
-                    game_result_window.click()
+                    if game_result_window is not None:
+                        response = game_result_window.click(event)
+                        if response == GameResultResponse.REMATCH:
+                            game_result_window = None
+                            player_color = Color.WHITE if player_color != Color.WHITE else Color.BLACK
+                            game = get_new_game(player_color)
+                            game.start()
 
             if event.type == pg.MOUSEBUTTONUP:
                 if game.status == game_settings.GameStatus.IN_PROGRESS:
@@ -78,9 +84,9 @@ def main():
 
         if game.status == game_settings.GameStatus.OVER:
             if game_result_window is None:
-                game_result_window = GameResultWindow((300, 400), game.result, player_color)
+                game_result_window = GameResultWindow((250, 150), (300, 400), game.result, player_color)
 
-            game_result_window.display(display, (250, 150))
+            game_result_window.display(display)
 
         # Refresh the display
         pg.display.update()
