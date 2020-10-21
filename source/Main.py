@@ -7,6 +7,7 @@ from source.game.Board import Board
 from source.game.Player import Player
 from source.pieces.Constants import Color
 from source.menu.GameResultWindow import GameResultWindow
+from source.menu import MenuConstants
 from source.menu.MenuConstants import GameResultResponse
 
 
@@ -84,7 +85,10 @@ def main():
 
         if game.status == game_settings.GameStatus.OVER:
             if game_result_window is None:
-                game_result_window = GameResultWindow((250, 150), (300, 400), game.result, player_color)
+                game_result_window = GameResultWindow(MenuConstants.GAME_RESULT_WINDOW_POSITION,
+                                                      MenuConstants.GAME_RESULT_WINDOW_SIZE,
+                                                      game.result,
+                                                      player_color)
 
             game_result_window.display(display)
 
