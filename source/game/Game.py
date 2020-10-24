@@ -33,8 +33,8 @@ class Game:
 
         self.player_count = len(players)
         self.active_player = 0 if self.players[0].color == constants.Color.WHITE else 1
-        self.status = GameStatus.NOT_STARTED
-        self.result = None
+        self.status = GameStatus.OVER
+        self.result = (GameResult.VICTORY, GameFinish.CHECKMATE)
 
         self.max_moves = max_moves
         self.move_counter = 0

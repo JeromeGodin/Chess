@@ -2,8 +2,8 @@ import pygame as pg
 
 
 class Button:
-    def __init__(self, position, size, color, hovered_color, text, text_color, text_size, shadow_color=None,
-                 hovered_shadow_color=None):
+    def __init__(self, position, size, color, hovered_color, text, text_color, text_size, click_callback,
+                 shadow_color=None, hovered_shadow_color=None, parent_offset=(0, 0)):
         self.position = position
         self.size = size
         self.color = color
@@ -11,14 +11,24 @@ class Button:
         self.text = self.__initialize_font(text, text_size, text_color)
         self.shadow_color = shadow_color
         self.hovered_shadow_color = hovered_shadow_color
+        self.click_callback = click_callback
+        self._parent_offset = parent_offset
 
     @staticmethod
     def __initialize_font(text, text_size, text_color):
         return pg.font.Font("assets\\fonts\\Montserrat\\Montserrat-Bold.ttf", text_size).render(text, True, text_color)
 
+    def __hovered(self):
+        mouse_position = pg.mouse.get_pos()
+        button_position = (self.position[0] + self._parent_offset[0], self.position[1] + self._parent_offset[1])
+
+        return button_position[0] <= mouse_position[0] < (button_position[0] + self.size[0]) and \
+               button_position[1] <= mouse_position[1] < (button_position[1] + self.size[1])
+
     def draw(self, display, hovered=False):
         radius = 10
         shadow_height = 5
+        hovered = self.__hovered()
 
         button_color = self.color if not hovered else self.hovered_color
 
@@ -60,3 +70,11 @@ class Button:
         display.blit(self.text, (
             self.position[0] + (self.size[0] - self.text.get_rect().width) / 2,
             self.position[1] + (self.size[1] - self.text.get_rect().height) / 2))
+
+    def click(self, event):
+        response = None
+
+        if event.type == pg.MOUSEBUTTONDOWN and self.__hovered():
+            response = self.click_callback()
+
+        return response

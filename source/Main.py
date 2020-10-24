@@ -5,8 +5,8 @@ from source.game import GameSettings as game_settings
 from source.game.Game import Game
 from source.game.Board import Board
 from source.game.Player import Player
-from source.pieces.Constants import Color
 from source.menu.GameResultWindow import GameResultWindow
+from source.pieces.Constants import Color
 from source.menu import MenuConstants
 from source.menu.MenuConstants import GameResultResponse
 
@@ -48,7 +48,7 @@ def main():
 
     # Initializing a new game
     game = get_new_game(player_color)
-    game.start()
+    # game.start()
 
     # Main game loop
     while True:
