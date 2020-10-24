@@ -7,12 +7,12 @@ from source.menu.Window import Window
 
 
 class GameResultWindow(Window):
-    def __init__(self, position, size, result, color, parent_offset=(0, 0)):
+    def __init__(self, position, size, result, color, parent_offset=(0, 0), click_callback=None):
         self._result = result
         self._color = color
 
         super().__init__(position, size, self.__initialize_game_result_window_background(size, result, color),
-                         self.__initialize_game_result_window_buttons(position), parent_offset)
+                         self.__initialize_game_result_window_buttons(position), parent_offset, click_callback)
 
     @staticmethod
     def __initialize_game_result_window_background(size, result, color):
