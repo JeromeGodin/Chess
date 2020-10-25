@@ -12,7 +12,7 @@ class GameResultWindow(Window):
         self._color = color
 
         super().__init__(position, size, self.__initialize_game_result_window_background(size, result, color),
-                         self.__initialize_game_result_window_buttons(position), parent_offset, click_callback)
+                         self.__initialize_game_result_window_buttons(position, size), parent_offset, click_callback)
 
     @staticmethod
     def __initialize_game_result_window_background(size, result, color):
@@ -58,6 +58,26 @@ class GameResultWindow(Window):
 
         return window_background
 
+    def __initialize_game_result_window_buttons(self, parent_offset, size):
+        button_color = (255, 165, 0, 255)
+        hovered_button_color = (255, 186, 57, 255)
+        button_shadow_color = (155, 101, 0, 255)
+        hovered_button_shadow_color = (198, 128, 0, 255)
+        text_color = (255, 255, 255, 255)
+        button_size = (250, 50)
+        button_horizontal_pos = int(math.floor((size[0] - button_size[0]) / 2))
+
+        return [
+            Button((button_horizontal_pos, 160), button_size, button_color, hovered_button_color, 'Rematch', text_color,
+                   18, self.__rematch_button_click, button_shadow_color, hovered_button_shadow_color,
+                   parent_offset),
+            Button((button_horizontal_pos, 230), button_size, button_color, hovered_button_color, 'Review Game',
+                   text_color, 18, self.__review_button_click, button_shadow_color, hovered_button_shadow_color,
+                   parent_offset),
+            Button((button_horizontal_pos, 330), button_size, button_color, hovered_button_color, 'Back To Main Menu',
+                   text_color, 18, self.__menu_button_click, button_shadow_color, hovered_button_shadow_color,
+                   parent_offset)]
+
     @staticmethod
     def __rematch_button_click():
         return GameResultResponse.REMATCH
@@ -69,19 +89,3 @@ class GameResultWindow(Window):
     @staticmethod
     def __menu_button_click():
         return GameResultResponse.MENU
-
-    def __initialize_game_result_window_buttons(self, parent_offset):
-        button_color = (255, 165, 0, 255)
-        hovered_button_color = (255, 186, 57, 255)
-        button_shadow_color = (155, 101, 0, 255)
-        hovered_button_shadow_color = (198, 128, 0, 255)
-        text_color = (255, 255, 255, 255)
-
-        return [Button((25, 160), (250, 50), button_color, hovered_button_color, 'Rematch', text_color,
-                       18, self.__rematch_button_click, button_shadow_color, hovered_button_shadow_color,
-                       parent_offset),
-                Button((25, 230), (250, 50), button_color, hovered_button_color, 'Review Game', text_color,
-                       18, self.__review_button_click, button_shadow_color, hovered_button_shadow_color, parent_offset),
-                Button((25, 330), (250, 50), button_color, hovered_button_color, 'Back To Main Menu',
-                       text_color, 18, self.__menu_button_click, button_shadow_color, hovered_button_shadow_color,
-                       parent_offset)]

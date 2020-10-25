@@ -7,7 +7,7 @@ from source.game.Board import Board
 from source.game.Player import Player
 from source.menu.GameResultWindow import GameResultWindow
 from source.pieces.Constants import Color
-from source.menu import MenuConstants
+from source.menu import MenuConstants, GameMenu
 from source.menu.MenuConstants import GameResultResponse
 
 
@@ -45,10 +45,8 @@ def main():
     clock = pg.time.Clock()
     game_result_window = None
     player_color = Color.WHITE
-
-    # Initializing a new game
-    game = get_new_game(player_color)
-    # game.start()
+    game = None
+    menu = GameMenu.Menu((0, 0), app_settings.DISPLAY_SIZE, app_settings.WINDOW_TITLE)
 
     # Main game loop
     while True:
@@ -58,8 +56,13 @@ def main():
                 sys.exit()
 
             if event.type == pg.MOUSEBUTTONDOWN:
-                if game.status == game_settings.GameStatus.NOT_STARTED:
-                    print('Menu click')
+                if game is None:
+                    response = menu.click(event)
+
+                    if response == Color.WHITE or response == Color.BLACK:
+                        player_color = response
+                        game = get_new_game(player_color)
+                        game.start()
                 elif game.status == game_settings.GameStatus.IN_PROGRESS:
                     game.click(event)
                 elif game.status == game_settings.GameStatus.OVER:
@@ -70,27 +73,33 @@ def main():
                             player_color = Color.WHITE if player_color != Color.WHITE else Color.BLACK
                             game = get_new_game(player_color)
                             game.start()
+                        elif response == GameResultResponse.MENU:
+                            menu.reset()
+                            game = None
 
             if event.type == pg.MOUSEBUTTONUP:
-                if game.status == game_settings.GameStatus.IN_PROGRESS:
-                    game.release_click(event)
+                if game is not None:
+                    if game.status == game_settings.GameStatus.IN_PROGRESS:
+                        game.release_click(event)
 
-        if game.status == game_settings.GameStatus.IN_PROGRESS:
-            # Update the position of the piece being dragged
-            game.update_selected_piece_position()
+        if game is not None:
+            # Refresh the game board
+            game.update_screen()
+            display.blit(game.screen, (0, 0))
 
-        # Refresh the game board
-        game.update_screen()
-        display.blit(game.screen, (0, 0))
+            if game.status == game_settings.GameStatus.IN_PROGRESS:
+                # Update the position of the piece being dragged
+                game.update_selected_piece_position()
+            elif game.status == game_settings.GameStatus.OVER:
+                if game_result_window is None:
+                    game_result_window = GameResultWindow(MenuConstants.GAME_RESULT_WINDOW_POSITION,
+                                                          MenuConstants.GAME_RESULT_WINDOW_SIZE,
+                                                          game.result,
+                                                          player_color)
 
-        if game.status == game_settings.GameStatus.OVER:
-            if game_result_window is None:
-                game_result_window = GameResultWindow(MenuConstants.GAME_RESULT_WINDOW_POSITION,
-                                                      MenuConstants.GAME_RESULT_WINDOW_SIZE,
-                                                      game.result,
-                                                      player_color)
-
-            game_result_window.display(display)
+                game_result_window.display(display)
+        else:
+            menu.display(display)
 
         # Refresh the display
         pg.display.update()
