@@ -53,7 +53,7 @@ class Menu:
         button_horizontal_pos = int(math.floor((size[0] - button_size[0]) / 2))
         buttons = [
             Button((button_horizontal_pos, 300), button_size, button_color, hovered_button_color, 'Split Screen',
-                   button_text_color, button_text_size, self.__split_screen_click, button_shadow_color,
+                   button_text_color, button_text_size, self.__forward_click, button_shadow_color,
                    hovered_button_shadow_color, parent_offset),
             Button((button_horizontal_pos, 405), button_size, button_color, hovered_button_color, 'Local Network',
                    button_text_color, button_text_size, self.__local_network_click, button_shadow_color,
@@ -79,12 +79,15 @@ class Menu:
         button_text_size = 42
         button_horizontal_pos = int(math.floor((size[0] - button_size[0]) / 2))
         buttons = [
-            Button((button_horizontal_pos, 300), button_size, (250, 250, 250, 255), (255, 255, 255, 255), 'White',
+            Button((button_horizontal_pos, 250), button_size, (250, 250, 250, 255), (255, 255, 255, 255), 'White',
                    (0, 0, 0, 255), button_text_size, self.__white_click, (149, 148, 148, 255), (194, 194, 194, 255),
                    parent_offset),
-            Button((button_horizontal_pos, 430), button_size, (102, 100, 99, 255), (149, 146, 145, 255), 'Black',
+            Button((button_horizontal_pos, 380), button_size, (102, 100, 99, 255), (149, 146, 145, 255), 'Black',
                    (255, 255, 255, 255), button_text_size, self.__black_click, (47, 45, 45, 255), (95, 92, 91, 255),
-                   parent_offset)]
+                   parent_offset),
+            Button((button_horizontal_pos, 550), (500, 75), (255, 165, 0, 255), (255, 186, 57, 255), 'Back',
+                   (255, 255, 255, 255), button_text_size, self.__back_click, (155, 101, 0, 255),
+                   (198, 128, 0, 255), parent_offset)]
 
         return Window(position, size, background_surface, buttons, parent_offset)
 
@@ -110,8 +113,12 @@ class Menu:
         self.active_window = 1
         return None
 
-    def __split_screen_click(self):
-        self.active_window = 2
+    def __forward_click(self):
+        self.active_window = self.active_window + 1
+        return None
+
+    def __back_click(self):
+        self.active_window = self.active_window - 1
         return None
 
     def __local_network_click(self):
