@@ -74,6 +74,7 @@ def main():
                             game = get_new_game(player_color)
                             game.start()
                         elif response == GameResultResponse.MENU:
+                            game_result_window = None
                             menu.reset()
                             game = None
 
