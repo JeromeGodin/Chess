@@ -23,9 +23,9 @@ class Button:
         button_position = (self.position[0] + self._parent_offset[0], self.position[1] + self._parent_offset[1])
 
         return button_position[0] <= mouse_position[0] < (button_position[0] + self.size[0]) and \
-               button_position[1] <= mouse_position[1] < (button_position[1] + self.size[1])
+            button_position[1] <= mouse_position[1] < (button_position[1] + self.size[1])
 
-    def draw(self, display, hovered=False):
+    def draw(self, display):
         radius = 10
         shadow_height = 5
         hovered = self.__hovered()

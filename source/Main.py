@@ -85,8 +85,7 @@ def main():
 
         if game is not None:
             # Refresh the game board
-            game.update_screen()
-            display.blit(game.screen, (0, 0))
+            game.display(display, (0, 0))
 
             if game.status == game_settings.GameStatus.IN_PROGRESS:
                 # Update the position of the piece being dragged

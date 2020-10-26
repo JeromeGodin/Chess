@@ -21,6 +21,7 @@ class Game:
         self.board = board
         self.players = players
         self.screen = self.__initialize_screen(display_size)
+        self.overlay = self.__initialize_screen(display_size)
         self.__initialized_sounds()
         self.__initialize_font()
 
@@ -211,6 +212,17 @@ class Game:
         if not self.__promotion_in_progress:
             self.__pass_turn()
 
+    def __display_tiles(self):
+        for tile_row in self.board.tiles:
+            for tile in tile_row:
+                if not tile.currently_animated:
+                    pg.draw.rect(self.screen, tile.color, tile.background)
+
+    def __display_last_move(self):
+        if self.last_move is not None:
+            pg.draw.rect(self.screen, self.board.last_move_color, self.last_move[0].background)
+            pg.draw.rect(self.screen, self.board.last_move_color, self.last_move[1].background)
+
     def __display_ranks(self):
         index = 0
 
@@ -226,6 +238,31 @@ class Game:
             self.screen.blit(file, (self.board.tiles[self.board.size[1] - 1][index].display_position[0] + 85,
                                     self.board.tiles[self.board.size[1] - 1][index].display_position[1] + 75))
             index = index + 1
+
+    def __display_pieces(self):
+        for player in self.players:
+            for piece in player.pieces:
+                if piece is not self.dragged_piece and not piece.captured and not piece.currently_animated:
+                    self.screen.blit(piece.image, piece.display_position)
+
+    def __display_overlay(self):
+        self.overlay.fill((255, 255, 255, 0))
+
+        for move in self.possible_moves:
+            if move[2]:
+                pg.draw.circle(self.overlay, self.possible_move_color, move[1], self.possible_capture_radius,
+                               self.possible_capture_width)
+            else:
+                pg.draw.circle(self.overlay, self.possible_move_color, move[1], self.possible_move_radius)
+
+        if self.dragged_piece is not None:
+            hovered_tile = self.__get_tile_from_position(pg.mouse.get_pos())
+            pg.draw.rect(self.overlay, self.possible_move_color,
+                         pg.Rect(hovered_tile.display_position[0], hovered_tile.display_position[1],
+                                 hovered_tile.tile_size,
+                                 hovered_tile.tile_size), self.hovered_tile_border_width)
+
+            self.overlay.blit(self.dragged_piece.image, self.dragged_piece.display_position)
 
     def __run_background_animation(self):
         for animation in self.color_animations:
@@ -519,48 +556,24 @@ class Game:
 
         return insufficient_material
 
-    def update_screen(self):
-        # self.screen.fill((0, 0, 0, 255))
-
-        for tile_row in self.board.tiles:
-            for tile in tile_row:
-                if not tile.currently_animated:
-                    pg.draw.rect(self.screen, tile.color, tile.background)
-
-        if self.last_move is not None:
-            pg.draw.rect(self.screen, self.board.last_move_color, self.last_move[0].background)
-            pg.draw.rect(self.screen, self.board.last_move_color, self.last_move[1].background)
-
+    def __update_screen(self):
+        self.__display_tiles()
+        self.__display_last_move()
         self.__display_ranks()
         self.__display_files()
-
         self.__run_background_animation()
 
-        for player in self.players:
-            for piece in player.pieces:
-                if piece is not self.dragged_piece and not piece.captured and not piece.currently_animated:
-                    self.screen.blit(piece.image, piece.display_position)
-
-        for move in self.possible_moves:
-            if move[2]:
-                pg.draw.circle(self.screen, self.possible_move_color, move[1], self.possible_capture_radius,
-                               self.possible_capture_width)
-            else:
-                pg.draw.circle(self.screen, self.possible_move_color, move[1], self.possible_move_radius)
-
+        self.__display_pieces()
         self.__run_piece_animation()
-
-        if self.dragged_piece is not None:
-            hovered_tile = self.__get_tile_from_position(pg.mouse.get_pos())
-            pg.draw.rect(self.screen, self.possible_move_color,
-                         pg.Rect(hovered_tile.display_position[0], hovered_tile.display_position[1],
-                                 hovered_tile.tile_size,
-                                 hovered_tile.tile_size), self.hovered_tile_border_width)
-
-            self.screen.blit(self.dragged_piece.image, self.dragged_piece.display_position)
+        self.__display_overlay()
 
         if self.__promotion_in_progress:
             self.__display_promotion_window()
+
+    def display(self, display, position):
+        self.__update_screen()
+        display.blit(self.screen, position)
+        display.blit(self.overlay, position)
 
     def click(self, event):
         if self.status == GameStatus.IN_PROGRESS:

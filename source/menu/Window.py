@@ -16,7 +16,7 @@ class Window:
         window_position = (self._position[0] + self._parent_offset[0], self._position[1] + self._parent_offset[1])
 
         return window_position[0] <= mouse_position[0] < (window_position[0] + self._size[0]) and \
-               window_position[1] <= mouse_position[1] < (window_position[1] + self._size[1])
+            window_position[1] <= mouse_position[1] < (window_position[1] + self._size[1])
 
     def display(self, display):
         for button in self.buttons:
