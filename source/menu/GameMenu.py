@@ -1,5 +1,6 @@
-import pygame as pg
 import math
+import sys
+import pygame as pg
 from source.menu.Button import Button
 from source.menu.Window import Window
 from source.pieces.Constants import Color
@@ -38,7 +39,7 @@ class Menu:
 
         self.__draw_menu_borders(background_surface, size)
         text = pg.font.Font("assets\\fonts\\Montserrat\\Montserrat-ExtraBold.ttf", 40).render(
-            'How would you like to play?', True, (0, 0, 0, 255))
+            'Choose a game mode', True, (0, 0, 0, 255))
 
         background_surface.blit(text,
                                 ((size[0] - text.get_rect().width) / 2, (size[1] - text.get_rect().height) / 2 - 200))
@@ -52,14 +53,17 @@ class Menu:
         button_text_color = (255, 255, 255, 255)
         button_horizontal_pos = int(math.floor((size[0] - button_size[0]) / 2))
         buttons = [
-            Button((button_horizontal_pos, 300), button_size, button_color, hovered_button_color, 'Split Screen',
+            Button((button_horizontal_pos, 250), button_size, button_color, hovered_button_color, 'Split Screen',
                    button_text_color, button_text_size, self.__forward_click, button_shadow_color,
                    hovered_button_shadow_color, parent_offset),
-            Button((button_horizontal_pos, 405), button_size, button_color, hovered_button_color, 'Local Network',
+            Button((button_horizontal_pos, 345), button_size, button_color, hovered_button_color, 'Local Network',
                    button_text_color, button_text_size, self.__local_network_click, button_shadow_color,
                    hovered_button_shadow_color, parent_offset),
-            Button((button_horizontal_pos, 510), button_size, button_color, hovered_button_color, 'Online',
+            Button((button_horizontal_pos, 440), button_size, button_color, hovered_button_color, 'Online',
                    button_text_color, button_text_size, self.__online_click, button_shadow_color,
+                   hovered_button_shadow_color, parent_offset),
+            Button((button_horizontal_pos, 550), button_size, button_color, hovered_button_color, 'Quit',
+                   button_text_color, button_text_size, self.__quit_click, button_shadow_color,
                    hovered_button_shadow_color, parent_offset)]
 
         return Window(position, size, background_surface, buttons, parent_offset)
@@ -70,7 +74,7 @@ class Menu:
 
         self.__draw_menu_borders(background_surface, size)
         text = pg.font.Font("assets\\fonts\\Montserrat\\Montserrat-ExtraBold.ttf", 40).render(
-            'Which color would you like to play?', True, (0, 0, 0, 255))
+            'Choose a color', True, (0, 0, 0, 255))
 
         background_surface.blit(text,
                                 ((size[0] - text.get_rect().width) / 2, (size[1] - text.get_rect().height) / 2 - 200))
@@ -82,7 +86,7 @@ class Menu:
             Button((button_horizontal_pos, 250), button_size, (250, 250, 250, 255), (255, 255, 255, 255), 'White',
                    (0, 0, 0, 255), button_text_size, self.__white_click, (149, 148, 148, 255), (194, 194, 194, 255),
                    parent_offset),
-            Button((button_horizontal_pos, 380), button_size, (102, 100, 99, 255), (149, 146, 145, 255), 'Black',
+            Button((button_horizontal_pos, 370), button_size, (102, 100, 99, 255), (149, 146, 145, 255), 'Black',
                    (255, 255, 255, 255), button_text_size, self.__black_click, (47, 45, 45, 255), (95, 92, 91, 255),
                    parent_offset),
             Button((button_horizontal_pos, 550), (500, 75), (255, 165, 0, 255), (255, 186, 57, 255), 'Back',
@@ -130,6 +134,9 @@ class Menu:
         # Add the actual menu when it is done.
         self.active_window = 1
         return None
+
+    def __quit_click(self):
+        sys.exit()
 
     @staticmethod
     def __white_click():
