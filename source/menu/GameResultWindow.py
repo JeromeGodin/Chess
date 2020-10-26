@@ -68,10 +68,10 @@ class GameResultWindow(Window):
         button_horizontal_pos = int(math.floor((size[0] - button_size[0]) / 2))
 
         return [
-            Button((button_horizontal_pos, 160), button_size, button_color, hovered_button_color, 'Rematch', text_color,
+            Button((button_horizontal_pos, 130), button_size, button_color, hovered_button_color, 'Rematch', text_color,
                    18, self.__rematch_button_click, button_shadow_color, hovered_button_shadow_color,
                    parent_offset),
-            Button((button_horizontal_pos, 230), button_size, button_color, hovered_button_color, 'Review Game',
+            Button((button_horizontal_pos, 200), button_size, button_color, hovered_button_color, 'Review Game',
                    text_color, 18, self.__review_button_click, button_shadow_color, hovered_button_shadow_color,
                    parent_offset),
             Button((button_horizontal_pos, 330), button_size, button_color, hovered_button_color, 'Back To Main Menu',
