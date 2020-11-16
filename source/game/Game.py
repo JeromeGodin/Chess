@@ -344,7 +344,7 @@ class Game:
         pieces = []
         is_check = False
 
-        self.__promote_piece(self.__promoting_piece, piece_choice)
+        new_piece_name = self.__promote_piece(self.__promoting_piece, piece_choice).name
 
         for player in self.players:
             pieces.extend(player.pieces)
@@ -352,6 +352,8 @@ class Game:
         for player in self.players:
             if player.number != self.active_player:
                 is_check = is_check or player.get_is_in_check(pieces, self.board)
+
+        self.move_history.add_promotion_mark(new_piece_name)
 
         pg.mixer.Sound.play(self.check_sound if is_check else self.promotion_sound)
 

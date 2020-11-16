@@ -51,11 +51,19 @@ class GameHistory:
         else:
             self.move_history[-1] = (self.move_history[-1][0], move)
 
+        print(self.move_history)
+
     def add_checkmate_mark(self):
         if self.move_history[-1][1] != '':
             self.move_history[-1] = (self.move_history[-1][0], self.move_history[-1][1].replace('+', '#'))
         else:
             self.move_history[-1] = (self.move_history[-1][0].replace('+', '#'), self.move_history[-1][1])
+
+    def add_promotion_mark(self, piece_name):
+        if self.move_history[-1][1] != '':
+            self.move_history[-1] = (self.move_history[-1][0], self.move_history[-1][1] + '=' + piece_name)
+        else:
+            self.move_history[-1] = (self.move_history[-1][0] + '=' + piece_name, self.move_history[-1][1])
 
     def check_for_repetition(self):
         repetition = False
