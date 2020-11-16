@@ -6,7 +6,7 @@ from source.pieces.Move import Move
 
 class Rook(Piece):
     def __init__(self, owner, board_position, display_position, color):
-        super().__init__(owner, board_position, display_position, color, constants.Type.ROOK, 'R', 4)
+        super().__init__(owner, board_position, display_position, color, constants.Type.ROOK, 'R', 5)
         self.image = pg.image.load(
             'assets\\images\\pieces\\wr100.png' if color == constants.Color.WHITE else 'assets\\images\\pieces\\br100'
                                                                                        '.png')
